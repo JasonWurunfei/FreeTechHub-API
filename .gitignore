@@ -5,6 +5,12 @@
 __pycache__
 db.sqlite3
 media
+static
+
+# django migrations
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
 
 # Backup files # 
 *.bak 
