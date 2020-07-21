@@ -1,11 +1,13 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
+# from tag.serializers import TagToTaggedItemSerializer
 from .models import Blog
 
-class BlogSerializer(ModelSerializer):
+class BlogSerializer(serializers.ModelSerializer):
+    # tags = TagToTaggedItemSerializer(many=True, required=False)
 
     class Meta:
         model = Blog
         fields = [
             "id", "title", "content",
-            "date", "viewTimes", "owner", 'tags'
+            "date", "viewTimes", "owner"
         ]
