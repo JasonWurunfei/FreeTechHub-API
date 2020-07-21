@@ -22,9 +22,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],
             'content': request.data['content'],
-            'bounty':request.data['rewarded_money'],
+            'bounty':request.data['bounty'],
             'viewTimes': 0,
-            'note': request.data['note'],
             'status': False,
             'owner' : request.user.id
         }

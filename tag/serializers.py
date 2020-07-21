@@ -1,7 +1,11 @@
 from rest_framework import serializers
 from .models import Tag
-from blog.models import Blog
 from blog.serializers import BlogSerializer
+from blog.models import Blog
+from question.serializers import QuestionSerializer
+from question.models import Question
+
+from django.contrib.contenttypes.models import ContentType
 
 class TaggedObjectRelatedField(serializers.RelatedField):
     """
@@ -12,20 +16,38 @@ class TaggedObjectRelatedField(serializers.RelatedField):
         Serialize tagged objects to a simple textual representation.
         """
         if isinstance(value, Blog):
-            data = {
-                'contenttype': 'blog',
-                'id': value.id,
-                'title': value.title,
-                'content': value.content,
-                'date': value.date,
-                'viewTimes': value.viewTimes,
-                'owner_id': value.owner.id
-            }
-            return data
+            return BlogSerializer(value).data
+        if isinstance(value, Question):
+            return QuestionSerializer(value).data
         raise Exception('Unexpected type of tagged object')
 
 class TagSerializer(serializers.ModelSerializer):
     tagged_object = TaggedObjectRelatedField(read_only=True)
+
+    def validate_content_type(self, value):
+        """
+        Limit the content type to only blog and question
+        """
+
+        if value != ContentType.objects.get(app_label='blog', model='blog') and \
+           value != ContentType.objects.get(app_label='question', model='question'):
+           raise serializers.ValidationError("Tagged object can only be blog or question.")
+
+        return value
+
+    def validate_object_id(self, value):
+        """
+        Check if the tagged object is exist
+        """
+        tagged_item_type = ContentType.objects.get(
+            id=self.initial_data['content_type']).model_class()
+        try:
+            obj = tagged_item_type.objects.get(id=value)
+        except Blog.DoesNotExist:
+            raise serializers.ValidationError("Tagged blog does not exsit.")
+
+        return value
+
     class Meta:
         model = Tag
-        fields = ["id", "tagged_object", "tag_name"]
+        fields = ["id", "content_type", "object_id", "tag_name", "tagged_object"]
