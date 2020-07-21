@@ -22,11 +22,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],
             'content': request.data['content'],
-            'rewarded_money':request.data['rewarded_money'],
+            'bounty':request.data['rewarded_money'],
             'viewTimes': 0,
             'note': request.data['note'],
             'status': False,
-            'question_type': True,
             'owner' : request.user.id
         }
         serializer = self.get_serializer(data=data)

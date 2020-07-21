@@ -8,7 +8,6 @@ class QuestionSerializer(ModelSerializer):
         fields = [
             "id", "title", "content",
             "date", "viewTimes", "owner",
-            "rewarded_money","note","status",
-            "question_type",'tags'
+            "bounty","note","status",'tags'
         ]
         
