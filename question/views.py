@@ -18,8 +18,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
     ]
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
-        print(type(request.data))
         data = {
             'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],

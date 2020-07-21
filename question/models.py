@@ -11,3 +11,4 @@ class Question(models.Model):
     status = models.BooleanField(default=False)
     question_type = models.BooleanField(default=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
+    

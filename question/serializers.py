@@ -11,3 +11,4 @@ class QuestionSerializer(ModelSerializer):
             "rewarded_money","note","status",
             "question_type",'tags'
         ]
+        
