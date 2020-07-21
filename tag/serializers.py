@@ -45,6 +45,8 @@ class TagSerializer(serializers.ModelSerializer):
             obj = tagged_item_type.objects.get(id=value)
         except Blog.DoesNotExist:
             raise serializers.ValidationError("Tagged blog does not exsit.")
+        except Question.DoesNotExist:
+            raise serializers.ValidationError("Tagged blog does not exsit.")
 
         return value
 

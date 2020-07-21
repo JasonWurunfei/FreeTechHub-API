@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'tag.apps.TagConfig',
     'question.apps.QuestionConfig',
+    'transaction.apps.TransactionConfig',
 
     # third party packages
     'rest_framework',

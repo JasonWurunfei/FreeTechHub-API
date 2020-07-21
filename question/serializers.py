@@ -1,13 +1,19 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Question
+from .models import Question,Answer
 
 class QuestionSerializer(ModelSerializer):
 
     class Meta:
         model = Question
-        fields = [
-            "id", "title", "content",
-            "date",  "owner", "viewTimes",
-            "bounty","status"
-        ]
+        # fields = [
+        #     "id", "title", "content",
+        #     "date",  "owner", "viewTimes",
+        #     "bounty","status"
+        # ]
+        fields = '__all__'
         
+class AnswerSerializer(ModelSerializer):
+
+    class Meta:
+        model = Answer
+        fields = '__all__'
