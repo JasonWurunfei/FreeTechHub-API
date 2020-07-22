@@ -1,28 +1,8 @@
 from rest_framework import serializers
 from .models import Tag
-from blog.serializers import BlogSerializer
-from blog.models import Blog
-from question.serializers import QuestionSerializer
-from question.models import Question
-
 from django.contrib.contenttypes.models import ContentType
 
-class TaggedObjectRelatedField(serializers.RelatedField):
-    """
-    A custom field to use for the `tagged_object` generic relationship.
-    """
-    def to_representation(self, value):
-        """
-        Serialize tagged objects to a simple textual representation.
-        """
-        if isinstance(value, Blog):
-            return BlogSerializer(value).data
-        if isinstance(value, Question):
-            return QuestionSerializer(value).data
-        raise Exception('Unexpected type of tagged object')
-
 class TagSerializer(serializers.ModelSerializer):
-    tagged_object = TaggedObjectRelatedField(read_only=True)
 
     def validate_content_type(self, value):
         """
@@ -52,4 +32,5 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ["id", "content_type", "object_id", "tag_name", "tagged_object"]
+        fields = "__all__"
+

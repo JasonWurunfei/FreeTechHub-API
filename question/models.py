@@ -11,7 +11,7 @@ class Question(models.Model):
     viewTimes = models.IntegerField(default=0, blank=True)
     status = models.BooleanField(default=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
-    tags = GenericRelation(Tag)
+    tags = GenericRelation(Tag, related_query_name='question')
     
 
 class Answer(models.Model):

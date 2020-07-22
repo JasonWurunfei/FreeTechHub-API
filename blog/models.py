@@ -10,4 +10,4 @@ class Blog(models.Model):
     date        = models.DateTimeField(auto_now=True)
     viewTimes   = models.IntegerField(default=0, blank=True)
     owner       = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='blogs', on_delete=models.CASCADE)
-    tags = GenericRelation(Tag)
+    tags = GenericRelation(Tag, related_query_name='blog')
