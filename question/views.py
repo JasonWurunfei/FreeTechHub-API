@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializers import QuestionSerializer
-from .models import Question
+from .serializers import QuestionSerializer,AnswerSerializer
+from .models import Question, Answer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
@@ -32,3 +32,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class AnswerViewSet(viewsets.ModelViewSet):
+    queryset = Answer.objects.all()
+    serializer_class = AnswerSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
+    
