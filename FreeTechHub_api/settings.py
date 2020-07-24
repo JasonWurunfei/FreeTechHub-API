@@ -110,6 +110,8 @@ MIDDLEWARE = [
 # corsheaders
 CORS_ORIGIN_ALLOW_ALL = True # allow all
 
+ALLOWED_HOSTS = ['127.0.0.1']
+
 ROOT_URLCONF = 'FreeTechHub_api.urls'
 
 TEMPLATES = [

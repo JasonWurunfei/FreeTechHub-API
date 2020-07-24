@@ -12,15 +12,15 @@ from rest_framework.response import Response
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    # permission_classes = [
+    #     IsAuthenticated,
+    #     IsAuthenticatedOrReadOnly,
+    #     IsOwnerOrReadOnly
+    # ]
 
     def create(self, request, *args, **kwargs):
         data = {
-            'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
+            # 'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],
             'content': request.data['content'],
             'bounty':request.data['bounty'],
@@ -37,9 +37,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    # permission_classes = [
+    #     IsAuthenticated,
+    #     IsAuthenticatedOrReadOnly,
+    #     IsOwnerOrReadOnly
+    # ]
     

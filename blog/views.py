@@ -19,7 +19,7 @@ class BlogViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = {
-            'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
+            # 'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],
             'content': request.data['content'],
             'viewTimes': 0,

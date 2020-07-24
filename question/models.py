@@ -17,6 +17,6 @@ class Question(models.Model):
 class Answer(models.Model):
     content = models.TextField()
     time = models.DateTimeField(auto_now=True)
-    state = models.BooleanField(default=False)
+    status = models.BooleanField(default=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='answers', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name='answers', on_delete=models.CASCADE)
