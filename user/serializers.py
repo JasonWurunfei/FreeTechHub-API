@@ -4,7 +4,15 @@ from .models import User
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            "id", "last_login", "is_superuser","first_name","last_name","date_joined","username","email","date_of_birth","is_active","is_admin","is_authorized","balance","major","grade",
-            "bio","avatar","groups","user_permissions"
-        ]
+        exclude = ['password']
+        extra_kwargs = {
+            'last_login'        : {'read_only': True},
+            'is_superuser'      : {'read_only': True},
+            'date_joined'       : {'read_only': True},
+            'is_active'         : {'read_only': True},
+            'is_admin'          : {'read_only': True},
+            'is_authorized'     : {'read_only': True},
+            'balance'           : {'read_only': True},
+            'groups'            : {'read_only': True},
+            'user_permissions'  : {'read_only': True},
+        }

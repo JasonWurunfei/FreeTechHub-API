@@ -69,8 +69,8 @@ class User(AbstractUser):
     major   = models.CharField(max_length=30, blank=True, default='')
     grade   = models.CharField(max_length=20, blank=True, default='')
     bio     = models.TextField(blank=True, default='')
-    avatar  = ProcessedImageField(upload_to='avatar',
-                                  default='avatar/default.png',
+    avatar  = ProcessedImageField(upload_to='avatar/',
+                                  default='/avatar/default.png',
                                   verbose_name='avatar',
                                   #图片将处理成100 x 100的尺寸
                                   processors=[ResizeToFill(100,100)],)
