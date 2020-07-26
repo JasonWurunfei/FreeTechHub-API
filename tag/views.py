@@ -15,7 +15,6 @@ from django.contrib.contenttypes.models import ContentType
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-
         
 
 class QueryByTagView(APIView):
@@ -28,6 +27,7 @@ class QueryByTagView(APIView):
         """
         Return a list of all blogs or questions or both.
         """
+
         type_ = self.request.query_params.get('type', None)
         tag_name = self.request.query_params.get('tag_name', None)
 
@@ -62,5 +62,3 @@ class QueryByTagView(APIView):
         else:
             return Response("no query parameter is provided",
              status=status.HTTP_400_BAD_REQUEST)
-
-        

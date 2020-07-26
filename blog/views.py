@@ -23,7 +23,7 @@ class BlogViewSet(viewsets.ModelViewSet):
             'viewTimes': 0,
             'owner' : request.user.id
         }
-        if request.data['csrfmiddlewaretoken'] is not None:
+        if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
         
         serializer = self.get_serializer(data=data)
