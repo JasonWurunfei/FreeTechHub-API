@@ -8,8 +8,8 @@ from .permissions import IsOwnerOrReadOnly
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
-    # permission_classes = [
-    #     IsAuthenticated,
-    #     IsAuthenticatedOrReadOnly,
-    #     IsOwnerOrReadOnly
-    # ]
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
