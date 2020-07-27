@@ -1,19 +1,18 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from .models import Question,Answer
 from tag.serializers import TagSerializer
-
-class QuestionSerializer(ModelSerializer):
-    tags = TagSerializer(many=True, required=False)
-    class Meta:
-        model = Question
-        fields = [
-            "id", "title", "content", "date",
-            "bounty", "viewTimes", "status", "owner",
-            "tags"
-        ]
-
-class AnswerSerializer(ModelSerializer):
+        
+class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = '__all__'
+        fields = ["content", "time", "status", "owner", "question"]
+
+class QuestionSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, required=False)
+    answers = AnswerSerializer(many=True, required=False)
+    
+    class Meta:
+        model = Question
+        fields = ["id", "title", "content", "date", "viewTimes",
+        "owner", "status", "bounty", "tags", "answers"]

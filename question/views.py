@@ -7,7 +7,6 @@ from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
 
-
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
@@ -20,14 +19,16 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = {
-            'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],
             'content': request.data['content'],
             'bounty':request.data['bounty'],
             'viewTimes': 0,
             'status': False,
-            'owner' : request.user.id
+            'owner' : request.user.id,
         }
+        if request.data.get('csrfmiddlewaretoken') is not None:
+            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -42,4 +43,20 @@ class AnswerViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly
     ]
+
+    def create(self, request, *args, **kwargs):
+        data = {
+            status: False,
+            'owner' : request.user.id,
+            'question'  : request.data['question']
+        }
+        if request.data.get('csrfmiddlewaretoken') is not None:
+            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
+        
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     
