@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from rest_framework.views import APIView
 from .serializers import QuestionSerializer,AnswerSerializer
 from .models import Question, Answer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -12,15 +11,14 @@ from rest_framework.response import Response
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    # permission_classes = [
-    #     IsAuthenticated,
-    #     IsAuthenticatedOrReadOnly,
-    #     IsOwnerOrReadOnly
-    # ]
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
 
     def create(self, request, *args, **kwargs):
         data = {
-            # 'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
             'title': request.data['title'],
             'content': request.data['content'],
             'bounty':request.data['bounty'],
@@ -28,6 +26,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'status': False,
             'owner' : request.user.id,
         }
+        if request.data.get('csrfmiddlewaretoken') is not None:
+            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -37,20 +38,21 @@ class QuestionViewSet(viewsets.ModelViewSet):
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
-    # permission_classes = [
-    #     IsAuthenticated,
-    #     IsAuthenticatedOrReadOnly,
-    #     IsOwnerOrReadOnly
-    # ]
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
 
     def create(self, request, *args, **kwargs):
         data = {
-            # 'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
-            'content': request.data['content'],
             status: False,
             'owner' : request.user.id,
             'question'  : request.data['question']
         }
+        if request.data.get('csrfmiddlewaretoken') is not None:
+            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
+        
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
