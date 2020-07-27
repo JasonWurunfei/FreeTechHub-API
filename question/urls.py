@@ -7,5 +7,5 @@ router.register('question', QuestionViewSet)
 router.register('answer', AnswerViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),  
+    path('', include(router.urls)), 
 ]

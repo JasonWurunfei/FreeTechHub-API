@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.views import APIView
 from .serializers import QuestionSerializer,AnswerSerializer
 from .models import Question, Answer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
-
 
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -26,7 +26,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'bounty':request.data['bounty'],
             'viewTimes': 0,
             'status': False,
-            'owner' : request.user.id
+            'owner' : request.user.id,
         }
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -42,4 +42,19 @@ class AnswerViewSet(viewsets.ModelViewSet):
     #     IsAuthenticatedOrReadOnly,
     #     IsOwnerOrReadOnly
     # ]
+
+    def create(self, request, *args, **kwargs):
+        data = {
+            # 'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken'],
+            'content': request.data['content'],
+            status: False,
+            'owner' : request.user.id,
+            'question'  : request.data['question']
+        }
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     

@@ -6,11 +6,13 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = '__all__'
+        fields = ["content", "time", "status", "owner", "question"]
 
 class QuestionSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    answers = AnswerSerializer(many=True, required=False)
     
     class Meta:
         model = Question
-        fields = '__all__'
+        fields = ["id", "title", "content", "date", "viewTimes",
+        "owner", "status", "bounty", "tags", "answers"]
