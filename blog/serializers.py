@@ -21,7 +21,7 @@ class SeriesSerializer(serializers.ModelSerializer):
         fields = [ 
             "id", "name", "description",
             "date", "viewTimes", "owner", 
-            "sub_series_of", "sub_series","blogs"
+            "sub_series_of", "sub_series", "blogs"
         ]
         extra_kwargs = {
             'sub_series': {'read_only': True}

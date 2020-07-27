@@ -46,9 +46,11 @@ class SeriesViewSet(viewsets.ModelViewSet):
             'name': request.data['name'],
             'description': request.data['description'],
             'viewTimes': 0,
-            'owner' : request.user.id,
             'sub_series_of': request.data['sub_series_of'],
         }
+        if request.user.id is not None:
+            data.update({'owner' : request.user.id})
+
         if request.data['csrfmiddlewaretoken'] is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
         
