@@ -11,10 +11,10 @@ from rest_framework.response import Response
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
-    # permission_classes = [
-    #     IsAuthenticatedOrReadOnly,
-    #     IsOwnerOrReadOnly
-    # ]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
 
     def create(self, request, *args, **kwargs):
         data = {
@@ -36,10 +36,10 @@ class BlogViewSet(viewsets.ModelViewSet):
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
-    # permission_classes = [
-    #     IsAuthenticatedOrReadOnly,
-    #     IsOwnerOrReadOnly
-    # ]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
 
     def create(self, request, *args, **kwargs):
         data = {

@@ -11,11 +11,11 @@ from rest_framework.response import Response
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    # permission_classes = [
-    #     IsAuthenticated,
-    #     IsAuthenticatedOrReadOnly,
-    #     IsOwnerOrReadOnly
-    # ]
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
 
     def create(self, request, *args, **kwargs):
         data = {
