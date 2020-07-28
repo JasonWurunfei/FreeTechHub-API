@@ -11,10 +11,10 @@ from rest_framework.response import Response
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    # permission_classes = [
+    #     IsAuthenticatedOrReadOnly,
+    #     IsOwnerOrReadOnly
+    # ]
 
     def create(self, request, *args, **kwargs):
         data = {
@@ -25,7 +25,7 @@ class BlogViewSet(viewsets.ModelViewSet):
         }
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-        
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -36,10 +36,10 @@ class BlogViewSet(viewsets.ModelViewSet):
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    # permission_classes = [
+    #     IsAuthenticatedOrReadOnly,
+    #     IsOwnerOrReadOnly
+    # ]
 
     def create(self, request, *args, **kwargs):
         data = {
@@ -53,7 +53,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         if request.data['csrfmiddlewaretoken'] is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-        
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

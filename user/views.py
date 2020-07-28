@@ -4,17 +4,17 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
-from .serializers import UserSerializer
-from .models import User
+from .serializers import UserSerializer,FollowershipSerializer
+from .models import User, Followership
 from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [
-        IsAuthenticated,
-    ]
+    # permission_classes = [
+    #     IsAuthenticated,
+    # ]
 
 
 class GetSelfView(APIView):
@@ -31,3 +31,8 @@ class GetSelfView(APIView):
         user = self.get_object(request.user.id)
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+
+class FollowershipViewSet(viewsets.ModelViewSet):
+    queryset = Followership.objects.all()
+    serializer_class = FollowershipSerializer

@@ -11,11 +11,11 @@ from rest_framework.response import Response
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    # permission_classes = [
+    #     IsAuthenticated,
+    #     IsAuthenticatedOrReadOnly,
+    #     IsOwnerOrReadOnly
+    # ]
 
     def create(self, request, *args, **kwargs):
         data = {
@@ -28,7 +28,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         }
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-            
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -52,11 +52,9 @@ class AnswerViewSet(viewsets.ModelViewSet):
         }
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-        
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    
