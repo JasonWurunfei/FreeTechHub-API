@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # Create your views here.
 class BlogViewSet(viewsets.ModelViewSet):
@@ -21,8 +22,11 @@ class BlogViewSet(viewsets.ModelViewSet):
             'title': request.data['title'],
             'content': request.data['content'],
             'viewTimes': 0,
-            'owner' : request.user.id
+            'owner' : request.user.id,
         }
+        if request.data.get('series') is not None:
+            data.update({'series': request.data['series']})
+
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
 
@@ -46,12 +50,15 @@ class SeriesViewSet(viewsets.ModelViewSet):
             'name': request.data['name'],
             'description': request.data['description'],
             'viewTimes': 0,
-            'sub_series_of': request.data['sub_series_of'],
         }
+        
+        if request.data.get('sub_series_of') is not None:
+            data.update({'sub_series_of': request.data['sub_series_of']})
+
         if request.user.id is not None:
             data.update({'owner' : request.user.id})
 
-        if request.data['csrfmiddlewaretoken'] is not None:
+        if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
 
         serializer = self.get_serializer(data=data)
@@ -59,3 +66,17 @@ class SeriesViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class QueryView(APIView):
+    """
+    This view should return a list of all the blogs or series which 
+    are belong to the requesting user.
+    """
+    def get(self, request, format=None, **kwargs):
+        blogs = Blog.objects.filter(owner=request.user)
+        all_series = Series.objects.filter(owner=request.user)
+        user_related_content = {}
+        user_related_content['blog'] = [BlogSerializer(blog).data for blog in blogs]
+        user_related_content['series'] = [SeriesSerializer(series).data for series in all_series]
+        return Response(user_related_content)
