@@ -1,7 +1,16 @@
 from rest_framework.serializers import ModelSerializer
-from .models import User
+from rest_framework import serializers
+from .models import User, Followership
+
+class FollowershipSerializer(ModelSerializer):
+    class Meta:
+        model = Followership
+        fields = '__all__'
+
 
 class UserSerializer(ModelSerializer):
+    following_users = FollowershipSerializer(many=True, required=False)
+    follower_users =  FollowershipSerializer(many=True, required=False)
     class Meta:
         model = User
         exclude = ['password']

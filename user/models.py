@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
-
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
@@ -16,7 +16,7 @@ class MyUserManager(BaseUserManager):
         """
         if not username:
             raise ValueError('Users must have a username')
-        
+
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -94,3 +94,7 @@ class User(AbstractUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
+
+class Followership(models.Model):
+    following = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='following_users', on_delete=models.CASCADE)
+    follower = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='follower_users', on_delete=models.CASCADE)

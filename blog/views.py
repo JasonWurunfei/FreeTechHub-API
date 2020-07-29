@@ -25,7 +25,7 @@ class BlogViewSet(viewsets.ModelViewSet):
         }
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-        
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -53,7 +53,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         if request.data['csrfmiddlewaretoken'] is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-        
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
