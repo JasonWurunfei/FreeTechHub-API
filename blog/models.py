@@ -35,6 +35,6 @@ class Blog(models.Model):
                                     related_name='blogs',
                                     blank=True,
                                     null=True,
-                                    on_delete=models.CASCADE)
+                                    on_delete=models.SET_NULL)
 
     tags        = GenericRelation(Tag, related_query_name='blog')
