@@ -45,28 +45,6 @@ class SeriesViewSet(viewsets.ModelViewSet):
         IsOwnerOrReadOnly
     ]
 
-    def create(self, request, *args, **kwargs):
-        data = {
-            'name': request.data['name'],
-            'description': request.data['description'],
-            'viewTimes': 0,
-        }
-        
-        if request.data.get('sub_series_of') is not None:
-            data.update({'sub_series_of': request.data['sub_series_of']})
-
-        if request.user.id is not None:
-            data.update({'owner' : request.user.id})
-
-        if request.data.get('csrfmiddlewaretoken') is not None:
-            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
 
 class QueryView(APIView):
     """
