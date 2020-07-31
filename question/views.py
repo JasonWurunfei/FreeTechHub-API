@@ -48,7 +48,8 @@ class AnswerViewSet(viewsets.ModelViewSet):
         data = {
             status: False,
             'owner' : request.user.id,
-            'question'  : request.data['question']
+            'question'  : request.data['question'],
+            'content': request.data['content']
         }
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})

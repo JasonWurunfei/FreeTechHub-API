@@ -1,16 +1,18 @@
 from rest_framework import serializers
-# from tag.serializers import TagToTaggedItemSerializer
 from .models import Blog, Series
 from tag.serializers import TagSerializer
 
 class BlogSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    like_num = serializers.IntegerField(read_only=True)
+    dislike_num = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Blog
         fields = [ "id", "title", "content",
             "date", "viewTimes", "owner",
-            "series", "tags"]
+            "series", "tags", "like_num",
+            "dislike_num"]
 
 
 class SeriesSerializer(serializers.ModelSerializer):

@@ -1,7 +1,9 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from tag.models import Tag
+from like.models import Like
 
 # Create your models here.
 class Series(models.Model):
@@ -38,3 +40,19 @@ class Blog(models.Model):
                                     on_delete=models.SET_NULL)
 
     tags        = GenericRelation(Tag, related_query_name='blog')
+
+    @property
+    def content_type(self):
+        return ContentType.objects.get(app_label='blog', model='blog')
+
+    @property
+    def like_num(self):
+        return Like.objects.filter(content_type=self.content_type,
+                                   object_id=self.id,
+                                   like_type=True).count()
+
+    @property
+    def dislike_num(self):
+        return Like.objects.filter(content_type=self.content_type,
+                                   object_id=self.id,
+                                   like_type=False).count()
