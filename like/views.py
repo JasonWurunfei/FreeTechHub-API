@@ -59,7 +59,7 @@ class LikeView(APIView):
             return Response("Undo success!", status=status.HTTP_200_OK)
 
 
-class LikeHistory(APIView):
+class LikeHistoryView(APIView):
     """
     This view will show whether this user liked or disliked
     the content or neither.
