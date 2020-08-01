@@ -46,6 +46,10 @@ class Blog(models.Model):
         return ContentType.objects.get(app_label='blog', model='blog')
 
     @property
+    def content_type_id(self):
+        return self.content_type.id
+
+    @property
     def like_num(self):
         return Like.objects.filter(content_type=self.content_type,
                                    object_id=self.id,

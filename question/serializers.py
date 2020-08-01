@@ -5,12 +5,13 @@ from tag.serializers import TagSerializer
 class AnswerSerializer(serializers.ModelSerializer):
     like_num = serializers.IntegerField(read_only=True)
     dislike_num = serializers.IntegerField(read_only=True)
+    content_type_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Answer
         fields = ["id", "content", "time", "status",
                   "owner", "question", "like_num",
-                  "dislike_num"]
+                  "dislike_num", "content_type_id"]
 
 class QuestionSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)

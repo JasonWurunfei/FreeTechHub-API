@@ -26,6 +26,10 @@ class Answer(models.Model):
     @property
     def content_type(self):
         return ContentType.objects.get(app_label='question', model='answer')
+    
+    @property
+    def content_type_id(self):
+        return self.content_type.id
 
     @property
     def like_num(self):

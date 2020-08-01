@@ -7,4 +7,6 @@ router.register('like', views.LikeViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('like-item/', views.LikeView.as_view()),
+    path('like-history/', views.LikeHistory.as_view()),
 ]
