@@ -111,7 +111,6 @@ class FriendRequest(models.Model):
     def fromuser(self):
         return User.objects.filter(id=self.from_user.id)
 
-
     @property
     def touser(self):
         return User.objects.filter(id=self.to_user.id)
