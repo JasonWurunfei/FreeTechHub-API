@@ -98,3 +98,31 @@ class User(AbstractUser):
 class Followership(models.Model):
     following = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='following_users', on_delete=models.CASCADE)
     follower = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='follower_users', on_delete=models.CASCADE)
+
+
+class FriendRequest(models.Model):
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='to_user', on_delete=models.CASCADE)
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='from_user', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_cancel = models.BooleanField(default=False)
+    request_message = models.TextField(blank=True)
+
+    @property
+    def fromuser(self):
+        return User.objects.filter(id=self.from_user.id)
+
+    @property
+    def touser(self):
+        return User.objects.filter(id=self.to_user.id)
+
+class Friendship(models.Model):
+    friend_1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='friend1', on_delete=models.CASCADE,null=True)
+    friend_2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='friend2', on_delete=models.CASCADE,null=True)
+
+    @property
+    def friend1(self):
+        return User.objects.filter(id=self.friend_1.id)
+
+    @property
+    def friend2(self):
+        return User.objects.filter(id=self.friend_2.id)
