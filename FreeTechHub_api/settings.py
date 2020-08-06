@@ -50,7 +50,18 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'imagekit',
+    'social_django',
+    'rest_social_auth',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GITHUB_KEY = '5ee059616c2412fba0e3'
+SOCIAL_AUTH_GITHUB_SECRET = '52d240bb20846c0d42b4d40ceeed9207f5e90d3b'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/blog/'
 
 REST_FRAMEWORK = {
 
@@ -120,6 +131,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
