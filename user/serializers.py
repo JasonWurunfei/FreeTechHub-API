@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from .models import User, Followership
+from .models import User, Followership, FriendRequest, Friendship
+
 
 class FollowershipSerializer(ModelSerializer):
     class Meta:
@@ -25,3 +26,19 @@ class UserSerializer(ModelSerializer):
             'groups'            : {'read_only': True},
             'user_permissions'  : {'read_only': True},
         }
+
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    fromuser = UserSerializer(many=True, required=False)
+    touser  = UserSerializer(many=True, required=False)
+    class Meta:
+        model = FriendRequest
+        fields = '__all__'
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    friend1 = UserSerializer(many=True, required=False)
+    friend2 = UserSerializer(many=True, required=False)
+    class Meta:
+        model = Friendship
+        fields = '__all__'
