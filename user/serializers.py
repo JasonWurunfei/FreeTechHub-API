@@ -1,6 +1,8 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from .models import User, Followership, FriendRequest, Friendship
+from .models import (User, Followership,
+                     FriendRequest, Friendship,
+                     Chat, Message)
 
 
 class FollowershipSerializer(ModelSerializer):
@@ -41,4 +43,18 @@ class FriendshipSerializer(serializers.ModelSerializer):
     friend2 = UserSerializer(many=True, required=False)
     class Meta:
         model = Friendship
+        fields = '__all__'
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Chat
+        fields = '__all__'
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Message
         fields = '__all__'

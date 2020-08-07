@@ -81,7 +81,7 @@ class ChangePasswordView(APIView):
     queryset = User.objects.all()
     renderer_classes = [JSONRenderer]
 
-# ChangePassword
+    # ChangePassword
     def post(self, request, format=None):
         response = {'status': 100, 'data': None}
         data = request.data
@@ -134,7 +134,7 @@ class GetFriendView(APIView):
         all_friendlists = all_friend1lists | all_friend2lists
         all_related_friendlists = []
 
-#  Gets a list of friends for the relevant user
+        #  Gets a list of friends for the relevant user
         for all_friendlist in all_friendlists:
             if(all_friendlist.friend_1.id == request.user.id):
                 all_related_friendlists.append({
