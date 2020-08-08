@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Blog, Series
 from tag.serializers import TagSerializer
+from comment.serializers import CommentSerializer
 
 class BlogSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
@@ -13,7 +14,7 @@ class BlogSerializer(serializers.ModelSerializer):
         fields = [ "id", "title", "content",
             "date", "viewTimes", "owner",
             "series", "tags", "like_num",
-            "dislike_num", "content_type_id"]
+            "dislike_num", "content_type_id", "root_comment"]
 
 
 class SeriesSerializer(serializers.ModelSerializer):
