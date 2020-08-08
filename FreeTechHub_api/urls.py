@@ -6,6 +6,7 @@ from django.conf.urls import url
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('blog/', include('blog.urls')),
+    path('comment/', include('comment.urls')),
     path('user/', include('user.urls')),
     path('tag/', include('tag.urls')),
     path('question/', include('question.urls')),

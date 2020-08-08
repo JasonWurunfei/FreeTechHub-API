@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from tag.models import Tag
 from like.models import Like
+from comment.models import Comment
 
 # Create your models here.
 class Series(models.Model):
@@ -60,3 +61,7 @@ class Blog(models.Model):
         return Like.objects.filter(content_type=self.content_type,
                                    object_id=self.id,
                                    like_type=False).count()
+    root_comment = models.ForeignKey(Comment,
+                                      related_name='special_comment',
+                                      null=True,
+                                      on_delete=models.CASCADE)

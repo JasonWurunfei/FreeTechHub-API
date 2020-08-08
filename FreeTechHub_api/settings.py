@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'question.apps.QuestionConfig',
     'transaction.apps.TransactionConfig',
     'like.apps.LikeConfig',
+    'comment.apps.CommentConfig',
 
     # third party packages
     'rest_framework',

@@ -46,6 +46,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = {
+            'content':request.data['content'],
             status: False,
             'owner' : request.user.id,
             'question'  : request.data['question'],
