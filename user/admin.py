@@ -4,8 +4,16 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from .models import User
+from .models import (
+    User, Chat, Message, 
+    Followership, FriendRequest, Friendship
+)
+admin.site.register(Chat)
+admin.site.register(Message)
 
+admin.site.register(Followership)
+admin.site.register(FriendRequest)
+admin.site.register(Friendship)
 
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required

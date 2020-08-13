@@ -1,22 +1,23 @@
 from django.urls import path, include
 from rest_framework import routers
 from user  import views
-from .views import UserViewSet, GetSelfView, FollowershipViewSet
-from .views import FollowingshowView, ChangePasswordView, FriendRequestViewSet
-from .views import GetRequestView, FriendshipViewSet, GetFriendView
+
 
 router = routers.DefaultRouter()
-router.register('user', UserViewSet)
-router.register('followership',FollowershipViewSet)
-router.register('friendrequest',FriendRequestViewSet)
-router.register('friendship',FriendshipViewSet)
+router.register('user', views.UserViewSet)
+router.register('followership', views.FollowershipViewSet)
+router.register('friendrequest', views.FriendRequestViewSet)
+router.register('friendship', views.FriendshipViewSet)
+router.register('message', views.MessageViewSet)
+router.register('chat', views.ChatViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('getself/', GetSelfView.as_view()),
+    path('getself/', views.GetSelfView.as_view()),
     path('getfollowing/', views.FollowingshowView.as_view()),
     path('getfollower/', views.FollowershowView.as_view()),
     path('changepassword/', views.ChangePasswordView.as_view()),
     path('getrequest/', views.GetRequestView.as_view()),
-    path('getfriendlists/', views.GetFriendView.as_view()),
+    path('getfriends/<int:user_id>/', views.GetFriendsView.as_view()),
+    path('getchat/', views.GetChatView.as_view()),
 ]
