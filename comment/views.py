@@ -21,7 +21,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         data = {
             'content': request.data['content'],
             'owner' : request.user.id,
-            'status':False
         }
 
         if request.data.get('sub_comments_of') is not None:
