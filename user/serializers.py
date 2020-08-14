@@ -31,30 +31,29 @@ class UserSerializer(ModelSerializer):
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
-    fromuser = UserSerializer(many=True, required=False)
-    touser  = UserSerializer(many=True, required=False)
+    sender_instance    = UserSerializer(read_only=True)
+    receiver_instance  = UserSerializer(read_only=True)
     class Meta:
         model = FriendRequest
         fields = '__all__'
 
 
 class FriendshipSerializer(serializers.ModelSerializer):
-    friend1 = UserSerializer(many=True, required=False)
-    friend2 = UserSerializer(many=True, required=False)
+    friend_instance_1 = UserSerializer(read_only=True)
+    friend_instance_2 = UserSerializer(read_only=True)
     class Meta:
         model = Friendship
         fields = '__all__'
-
-
-class ChatSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Chat
-        fields = '__all__'
-
 
 class MessageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Message
         fields = '__all__'
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    messages = MessageSerializer(many=True, read_only=True)
+    class Meta:
+        model = Chat
+        fields = ['id', 'user1', 'user2', 'messages']

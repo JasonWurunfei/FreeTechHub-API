@@ -125,24 +125,120 @@ class GetRequestView(APIView):
         return Response(all_related_request)
 
 
-class GetFriendView(APIView):
+class GetFriendsView(APIView):
+
+    def get(self, request, user_id, format=None):
+        user = User.objects.get(id=user_id)
+
+        # because this user could be friend_1 or friend_2 of some
+        # Friendship, therefore we are getting all the relavent.
+        relavent_friendships_1 = Friendship.objects.filter(friend_1=user)
+        relavent_friendships_2 = Friendship.objects.filter(friend_2=user)
+        relavent_friendships = relavent_friendships_1 | relavent_friendships_2
+
+        serialized_friends = []
+        for friendship in relavent_friendships:
+            if friendship.friend_1 == user:
+                # if user is friend_1 in a friendship
+                # then friend_2 is this user's friend.
+                serialized_friends.append(
+                    UserSerializer(friendship.friend_2).data
+                )
+            else:
+                serialized_friends.append(
+                    UserSerializer(friendship.friend_1).data
+                )
+        
+        return Response(serialized_friends)
+        
+
+# Chat system
+from asgiref.sync import sync_to_async
+from .models import Chat, Message
+from .serializers import MessageSerializer, ChatSerializer
+
+class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+class ChatViewSet(viewsets.ModelViewSet):
+    queryset = Chat.objects.all()
+    serializer_class = ChatSerializer
+
+class FriendshipViewSet(viewsets.ModelViewSet):
+    queryset = Friendship.objects.all()
+    serializer_class = FriendshipSerializer
+
+
+class GetRequestView(APIView):
 
     def get(self, request, format=None):
         user = User.objects.filter(id=request.user.id)
-        all_friend1lists = Friendship.objects.filter(friend_1=request.user.id)
-        all_friend2lists = Friendship.objects.filter(friend_2=request.user.id)
-        all_friendlists = all_friend1lists | all_friend2lists
-        all_related_friendlists = []
+        all_requests = FriendRequest.objects.filter(to_user_id=request.user.id,
+        is_cancel=False)
+        all_related_request = {}
+        all_related_request['request'] = [FriendRequestSerializer(request).data for request in all_requests]
+        return Response(all_related_request)
 
-        #  Gets a list of friends for the relevant user
-        for all_friendlist in all_friendlists:
-            if(all_friendlist.friend_1.id == request.user.id):
-                all_related_friendlists.append({
-                'all_friendlist':FriendshipSerializer(all_friendlist).data,
-                 'related_user':UserSerializer(all_friendlist.friend_2).data})
-            else:
-                all_related_friendlists.append({
-                'all_friendlist':FriendshipSerializer(all_friendlist).data,
-                'related_user':UserSerializer(all_friendlist.friend_1).data})
 
-        return Response(all_related_friendlists)
+class GetChatView(APIView):
+
+    def get(self, request, format=None, **kwargs):
+        sender   = self.request.query_params.get('sender', None)
+        receiver = self.request.query_params.get('receiver', None)
+
+        try:
+            chat = Chat.objects.get(user1_id=sender,
+                                    user2_id=receiver)
+
+        except Chat.DoesNotExist:
+            chat, _ = Chat.objects.get_or_create(user1_id=receiver,
+                                                 user2_id=sender)
+
+        return Response(ChatSerializer(chat).data)
+
+
+async def WebsocketView(socket, live_sockects):
+    await socket.accept()
+    sender_id = None
+
+    while True:
+        message = await socket.receive_json()
+
+        # socket.receive_json() will return None if the massage
+        # if the message is to disconnect.
+        if message == None:
+            live_sockects.checkout(socket)
+            break
+        
+        sender_id = message['sender_id']
+        if message.get('register') == True:
+            live_sockects.register(sender_id, socket)
+            continue
+        
+        try:
+            chat = await sync_to_async(
+                Chat.objects.get
+            )(user1_id=message['sender_id'], user2_id=message['receiver_id'])
+
+        except Chat.DoesNotExist:
+            chat, _ = await sync_to_async(
+                Chat.objects.get_or_create
+            )(user1_id=message['receiver_id'], user2_id=message['sender_id'])
+
+        msg = await sync_to_async(Message.objects.create)(
+            belonging_chat=chat,
+            content=message['message'],
+            sender_id=sender_id
+        )
+
+        msg = MessageSerializer(msg).data
+        await socket.send_json(msg)
+
+        # live_sockects.get_socket will return None if 
+        # not find a match user in the list
+        receiver_socket = live_sockects.get_socket(message['receiver_id'])
+        # if receiver_socket == None means the receiver 
+        # is not online or at message page
+        if receiver_socket != None:
+            await receiver_socket.send_json(msg)

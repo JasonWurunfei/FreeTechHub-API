@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token
 from django.conf.urls import url
+from user.views import WebsocketView
+# just to signal this is a websocket path
+websocket = path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,6 +19,9 @@ urlpatterns = [
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-verify/', verify_jwt_token),
     url(r'^api/login/', include('rest_social_auth.urls_jwt')),
+
+    # Async views
+    websocket('ws/', WebsocketView),
 ]
 
 urlpatterns += [
