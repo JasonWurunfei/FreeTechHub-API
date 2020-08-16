@@ -39,8 +39,8 @@ class FollowershipViewSet(viewsets.ModelViewSet):
     queryset = Followership.objects.all()
     serializer_class = FollowershipSerializer
     permission_classes = [
-            IsAuthenticated,
-        ]
+        IsAuthenticated,
+    ]
 
 
 class FollowershowView(APIView):
@@ -103,10 +103,54 @@ class ChangePasswordView(APIView):
         response['data'] = context
         return JsonResponse(response, safe=False)
 
-
+from websocket.middleware import live_sockects
+from rest_framework import status
+from asgiref.sync import async_to_sync
 class FriendRequestViewSet(viewsets.ModelViewSet):
     queryset = FriendRequest.objects.all()
     serializer_class = FriendRequestSerializer
+
+    """
+    Create a FriendRequest instance and notice the receiver if
+    he or she is online
+    """
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        socket = live_sockects.get_socket(int(request.data['receiver']))
+        
+        if socket != None:
+            async_to_sync(socket.send_json)({"type": "request"})
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    """
+    Update a FriendRequest instance and meanwhile setup a friendship.
+    """
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        # override part
+        # if the update is state = approved, setup new friendship
+        if request.data['state'] == "A": 
+            Friendship.objects.create(
+                friend_1=instance.sender,
+                friend_2=instance.receiver
+            )
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
 
 class FriendshipViewSet(viewsets.ModelViewSet):
@@ -114,21 +158,28 @@ class FriendshipViewSet(viewsets.ModelViewSet):
     serializer_class = FriendshipSerializer
 
 
-class GetRequestView(APIView):
+class GetFriendRequestsView(APIView):
 
-    def get(self, request, format=None):
-        user = User.objects.filter(id=request.user.id)
-        all_requests = FriendRequest.objects.filter(to_user_id=request.user.id,
-        is_cancel=False)
-        all_related_request = {}
-        all_related_request['request'] = [FriendRequestSerializer(request).data for request in all_requests]
-        return Response(all_related_request)
+    def get(self, request, user_id, format=None):
+        requests = FriendRequest.objects.filter(sender_id=user_id).exclude(state="C")
+        data = FriendRequestSerializer(requests, many=True).data
+        return Response(data)
+
+class GetReceivedFriendRequestsView(APIView):
+
+    def get(self, request, user_id, format=None):
+        requests = FriendRequest.objects.filter(receiver_id=user_id, state="W")
+        data = FriendRequestSerializer(requests, many=True).data
+        return Response(data)
 
 
 class GetFriendsView(APIView):
 
     def get(self, request, user_id, format=None):
-        user = User.objects.get(id=user_id)
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise Http404
 
         # because this user could be friend_1 or friend_2 of some
         # Friendship, therefore we are getting all the relavent.
@@ -170,17 +221,6 @@ class FriendshipViewSet(viewsets.ModelViewSet):
     serializer_class = FriendshipSerializer
 
 
-class GetRequestView(APIView):
-
-    def get(self, request, format=None):
-        user = User.objects.filter(id=request.user.id)
-        all_requests = FriendRequest.objects.filter(to_user_id=request.user.id,
-        is_cancel=False)
-        all_related_request = {}
-        all_related_request['request'] = [FriendRequestSerializer(request).data for request in all_requests]
-        return Response(all_related_request)
-
-
 class GetChatView(APIView):
 
     def get(self, request, format=None, **kwargs):
@@ -216,28 +256,30 @@ async def WebsocketView(socket, live_sockects):
             live_sockects.register(sender_id, socket)
             continue
         
+        receiver_id = message['receiver_id']
         try:
             chat = await sync_to_async(
                 Chat.objects.get
-            )(user1_id=message['sender_id'], user2_id=message['receiver_id'])
+            )(user1_id=sender_id, user2_id=receiver_id)
 
         except Chat.DoesNotExist:
             chat, _ = await sync_to_async(
                 Chat.objects.get_or_create
-            )(user1_id=message['receiver_id'], user2_id=message['sender_id'])
+            )(user1_id=receiver_id, user2_id=sender_id)
 
         msg = await sync_to_async(Message.objects.create)(
             belonging_chat=chat,
             content=message['message'],
-            sender_id=sender_id
+            sender_id=sender_id,
         )
 
         msg = MessageSerializer(msg).data
+        msg.update({"type": "message", "receiver": receiver_id})
         await socket.send_json(msg)
 
         # live_sockects.get_socket will return None if 
         # not find a match user in the list
-        receiver_socket = live_sockects.get_socket(message['receiver_id'])
+        receiver_socket = live_sockects.get_socket(receiver_id)
         # if receiver_socket == None means the receiver 
         # is not online or at message page
         if receiver_socket != None:
