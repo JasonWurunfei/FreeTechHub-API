@@ -11,3 +11,7 @@ class Comment(models.Model):
     @property
     def sub_comment_models(self):
         return Comment.objects.filter(sub_comments_of=self.id)
+
+    @property
+    def owner_instance(self):
+        return self.owner
