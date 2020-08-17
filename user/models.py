@@ -59,6 +59,7 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_authorized = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
 
     objects = MyUserManager()
 
@@ -108,14 +109,14 @@ class Followership(models.Model):
 class FriendRequest(models.Model):
     sender          = models.ForeignKey(settings.AUTH_USER_MODEL,
                                         related_name="sent_request",
-                                        on_delete=models.CASCADE)
+                                        on_delete=models.CASCADE,null=True)
 
     receiver        = models.ForeignKey(settings.AUTH_USER_MODEL,
                                         related_name="received_request",
-                                        on_delete=models.CASCADE)
+                                        on_delete=models.CASCADE,null=True)
 
     datetime        = models.DateTimeField(auto_now_add=True)
-    note            = models.TextField()
+    note            = models.TextField(null=True)
 
     STATES_CHOICES = [
         ('A', 'approved'),
@@ -178,4 +179,13 @@ class Message(models.Model):
     sender          = models.ForeignKey(settings.AUTH_USER_MODEL,
                                         related_name="messageSender",
                                         on_delete=models.CASCADE)
-    
+
+
+class EmailValid(models.Model):
+    onwer = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                     related_name='onwer',
+                                     on_delete=models.CASCADE,null=True)
+    value = models.CharField(max_length=32)
+    email_address = models.CharField(max_length=32)
+    type = models.TextField(null=True)
+    time = models.DateTimeField(auto_now_add=True)

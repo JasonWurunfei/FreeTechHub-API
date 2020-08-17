@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = (
+    # 'django.contrib.auth.backends.AllowAllUsersModelBackend',
     'social_core.backends.github.GithubOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -181,13 +182,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# 置为False
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -197,3 +199,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 AUTH_USER_MODEL = 'user.User'
+
+#stmp account
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST_USER = '18358957971@163.com'
+EMAIL_HOST_PASSWORD = 'VNVCGQOWLXELHRKP'  #邮箱的授权码而非密码
+EMAIL_PORT = 25
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Freetechtub<18358957971@163.com>'

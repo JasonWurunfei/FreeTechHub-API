@@ -1,16 +1,52 @@
 from .models import User
+from django.core.mail import send_mail
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import UserSerializer, FollowershipSerializer
-from .serializers import FriendRequestSerializer, FriendshipSerializer
-from .models import User, Followership, FriendRequest, Friendship
+from .serializers import FriendRequestSerializer, FriendshipSerializer, EmailValidSerializer
+from .models import User, Followership, FriendRequest, Friendship, MyUserManager,EmailValid
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
+from django.utils.timezone import localtime
+from django.conf import settings
+import random
+import datetime
+import pytz
 
 # Create your views here.
+def Email_Code(len=15):
+    code_list = []
+    for i in range(10):
+        code_list.append(str(i))
+    for i in range(65, 91):
+        code_list.append(chr(i))
+    for i in range(97, 123):
+        code_list.append(chr(i))
+    myslice = random.sample(code_list, len)
+    code_ = ''.join(myslice)
+    return code_
+
+
+def SendEmail(user,email,type):
+    code1 = Email_Code()
+    code2 = Email_Code()
+    if type:
+        emailvate = EmailValid.objects.create(onwer = user, email_address=email, value=code1, type="ForgetPassowrd")
+        ret = "Your verification code is :http://localhost:8080/#/forgetpassword/{}/{}/{}".format(code1,emailvate.onwer.id,code2)
+    else:
+        emailvate = EmailValid.objects.create(onwer = user, email_address=email, value=code1, type="Verify")
+        ret = "Your verification code is :http://localhost:8080/#/active/{}/{}".format(code1,emailvate.onwer.id)
+    my_email = send_mail('Activation validation', ret, settings.DEFAULT_FROM_EMAIL, [email])
+
+
+class EmailValidViewSet(viewsets.ModelViewSet):
+        queryset = EmailValid.objects.all()
+        serializer_class = EmailValidSerializer
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -104,6 +140,35 @@ class ChangePasswordView(APIView):
         return JsonResponse(response, safe=False)
 
 
+class ChangeEmailView(APIView):
+# ChangeEmail
+    def post(self, request, format=None):
+        data = request.data
+        password = data.get('password')
+        email1 = data.get('email1')
+        user_ = self.request.user
+        if user_.check_password(password):
+            User.objects.filter(id = user_.id).update(email = email1,is_verified=False)
+            user = User.objects.get(id = user_.id)
+            type = False
+            SendEmail(user,email1,type)
+            return Response({'msg':'successful'})
+        else:
+            return Response({'msg':'ppppPlease enter code'})
+
+
+class ResetPasswordView(APIView):
+# ChangeEmail
+    def post(self, request, format=None):
+        data = request.data
+        password = data.get('password')
+        id = data.get('id')
+        user = User.objects.get(id = id)
+        user.set_password(password)
+        user.save()
+        return Response("successfully")
+
+
 class FriendRequestViewSet(viewsets.ModelViewSet):
     queryset = FriendRequest.objects.all()
     serializer_class = FriendRequestSerializer
@@ -148,9 +213,9 @@ class GetFriendsView(APIView):
                 serialized_friends.append(
                     UserSerializer(friendship.friend_1).data
                 )
-        
+
         return Response(serialized_friends)
-        
+
 
 # Chat system
 from asgiref.sync import sync_to_async
@@ -210,12 +275,12 @@ async def WebsocketView(socket, live_sockects):
         if message == None:
             live_sockects.checkout(socket)
             break
-        
+
         sender_id = message['sender_id']
         if message.get('register') == True:
             live_sockects.register(sender_id, socket)
             continue
-        
+
         try:
             chat = await sync_to_async(
                 Chat.objects.get
@@ -235,10 +300,77 @@ async def WebsocketView(socket, live_sockects):
         msg = MessageSerializer(msg).data
         await socket.send_json(msg)
 
-        # live_sockects.get_socket will return None if 
+        # live_sockects.get_socket will return None if
         # not find a match user in the list
         receiver_socket = live_sockects.get_socket(message['receiver_id'])
-        # if receiver_socket == None means the receiver 
+        # if receiver_socket == None means the receiver
         # is not online or at message page
         if receiver_socket != None:
             await receiver_socket.send_json(msg)
+
+
+class Email_codeView(APIView):
+    def post(self, request, format=None):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if email:
+            type=False
+            user_ = User.objects.create_user(username,email,password)
+            SendEmail(user_,email,type)
+            # code = Email_Code()
+            # emailvate = EmailValid.objects.create(onwer = user_, email_address=email,value=code)
+            # ret = "Your verification code is :http://localhost:8080/#/active/{}/{}".format(code,emailvate.onwer.id)
+            # my_email = send_mail('Activation validation', ret, settings.DEFAULT_FROM_EMAIL, [email])
+            return Response({'msg':'Please enter code'})
+        else:
+            return Response({'msg':'ppppPlease enter code'})
+
+
+class RegisterView(APIView):
+    def post(self, request, format=None):
+        code = request.data.get('code')
+        user_id = request.data.get('user_id')
+        email_obj = EmailValid.objects.filter(onwer = user_id).last()
+        if(email_obj.value == code):
+            now = datetime.datetime.now()+datetime.timedelta(minutes=-5)
+            now = now.replace(tzinfo=pytz.timezone('UTC'))
+            T1 = now.strftime("%Y-%m-%d-%H-%M-%S")
+            T2 = localtime(email_obj.time.replace(tzinfo=pytz.timezone('Asia/Shanghai')))
+            T2 = T2.strftime("%Y-%m-%d-%H-%M-%S")
+            T1 = [int(e) for e in T1.split('-')]
+            T2 = [int(e) for e in T2.split('-')]
+            print(now)
+            print(email_obj.time)
+            if T1 < T2:
+                user = User.objects.get(id = user_id, email=email_obj.email_address)
+                user.is_verified = True
+                user.save()
+                return Response("successful")
+            else:
+                return Response("timeout")
+        else:
+
+            return Response("wrong code")
+
+
+class Send_changepassword(APIView):
+    def post(self, request, format=None):
+        email = request.data.get('email')
+        user = User.objects.get(email = email)
+        if user !='':
+            type = True
+            SendEmail(user,email,type)
+            return Response("successful")
+        else:
+            return Response("error")
+
+
+class CheckUsernameView(APIView):
+    def get(self, request, format=None):
+        name = request.query_params.get('username')
+        count = User.objects.filter(username=username).count()
+        if count > 0:
+            return Response('False')
+        else:
+            return Response('True')
