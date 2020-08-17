@@ -2,12 +2,15 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import  CommentSerializer
 from .models import Comment
+from user.models import User
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from websocket.middleware import live_sockects
+from asgiref.sync import async_to_sync
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -21,7 +24,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         data = {
             'content': request.data['content'],
             'owner' : request.user.id,
-            'status':False
         }
 
         if request.data.get('sub_comments_of') is not None:
@@ -31,6 +33,18 @@ class CommentViewSet(viewsets.ModelViewSet):
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
 
         serializer = self.get_serializer(data=data)
+        try:
+            parentComment = Comment.objects.get(id=data['sub_comments_of'])
+        except Comment.DoesNotExist:
+            parentComment = None
+        
+        if parentComment != None:
+            receiver = parentComment.owner
+            socket = live_sockects.get_socket(receiver.pk)
+        
+        if socket != None:
+            async_to_sync(socket.send_json)({"type": "reply"})
+
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
