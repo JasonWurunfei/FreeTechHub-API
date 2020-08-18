@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'transaction.apps.TransactionConfig',
     'like.apps.LikeConfig',
     'comment.apps.CommentConfig',
+    'search.apps.SearchConfig',
 
     # third party packages
     'rest_framework',
