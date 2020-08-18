@@ -28,7 +28,6 @@ class Blog(models.Model):
     title       = models.CharField(max_length=40)
     content     = models.TextField()
     date        = models.DateTimeField(auto_now=True)
-    viewTimes   = models.IntegerField(default=0, blank=True)
 
     owner       = models.ForeignKey(settings.AUTH_USER_MODEL,
                                     related_name='blogs',
@@ -39,6 +38,11 @@ class Blog(models.Model):
                                     blank=True,
                                     null=True,
                                     on_delete=models.SET_NULL)
+
+    root_comment = models.ForeignKey(Comment,
+                                      related_name='special_comment',
+                                      null=True,
+                                      on_delete=models.CASCADE)
 
     tags        = GenericRelation(Tag, related_query_name='blog')
 
@@ -61,7 +65,14 @@ class Blog(models.Model):
         return Like.objects.filter(content_type=self.content_type,
                                    object_id=self.id,
                                    like_type=False).count()
-    root_comment = models.ForeignKey(Comment,
-                                      related_name='special_comment',
-                                      null=True,
-                                      on_delete=models.CASCADE)
+
+    @property
+    def view_num(self):
+        return self.views.count()
+
+
+class View(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    blog = models.ForeignKey(Blog, related_name="views",
+                             on_delete=models.CASCADE)
