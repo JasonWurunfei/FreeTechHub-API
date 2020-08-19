@@ -96,14 +96,22 @@ class User(AbstractUser):
 
 
 class Followership(models.Model):
+    # 被关注者
     following = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   related_name='following_users',
                                   on_delete=models.CASCADE)
-
+    # 粉丝（关注者）
     follower = models.ForeignKey(settings.AUTH_USER_MODEL,
                                  related_name='follower_users',
                                  on_delete=models.CASCADE)
 
+    @property
+    def following_user_instance(self):
+        return self.following
+    
+    @property
+    def follower_user_instance(self):
+        return self.follower
 
 class FriendRequest(models.Model):
     sender          = models.ForeignKey(settings.AUTH_USER_MODEL,

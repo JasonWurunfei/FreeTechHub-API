@@ -70,6 +70,10 @@ class Blog(models.Model):
     def view_num(self):
         return self.views.count()
 
+    @property
+    def owner_instance(self):
+        return self.owner
+
 
 class View(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
