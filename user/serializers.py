@@ -20,6 +20,7 @@ class EmailValidSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     following_users = FollowershipSerializer(many=True, required=False)
     follower_users =  FollowershipSerializer(many=True, required=False)
+    totallikes = serializers.IntegerField(read_only=True)
     class Meta:
         model = User
         exclude = ['password']
@@ -32,6 +33,7 @@ class UserSerializer(ModelSerializer):
             'is_authorized'     : {'read_only': True},
             'balance'           : {'read_only': True},
             'groups'            : {'read_only': True},
+            'totallikes'        : {'read_only': True},
             'user_permissions'  : {'read_only': True},
         }
 

@@ -29,4 +29,6 @@ urlpatterns = [
     path('send_change/', views.Send_changepassword.as_view()),
     path('resetpassword/', views.ResetPasswordView.as_view()),
     path('checkusername/', views.CheckUsernameView.as_view()),
+    path('upload/', views.UploadView.as_view()),
+    path('gettags/', views.GetSelftags.as_view()),
 ]

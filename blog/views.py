@@ -48,7 +48,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
 class QueryView(APIView):
     """
-    This view should return a list of all the blogs or series which 
+    This view should return a list of all the blogs or series which
     are belong to the requesting user.
     """
     def get(self, request, format=None, **kwargs):
@@ -62,11 +62,11 @@ class QueryView(APIView):
 
 class UpdateSelectedView(APIView):
     """
-    This view will update the foreign key of sub series 
+    This view will update the foreign key of sub series
     or related blogs of one series
     """
     def post(self, request, *args, **kwargs):
-        
+
         series = Series.objects.get(id=request.data['series'])
         selected_blogs = request.data['selected_items']['blog']
         selected_series = request.data['selected_items']['series']
@@ -77,14 +77,14 @@ class UpdateSelectedView(APIView):
 
         # If related_blogs and related_series is not empty, it means
         # that this view is called when editing an existing series
-        
+
         # remove not selected blogs but used to be in that series
         related_blogs = Blog.objects.filter(series=series)
         for blog in related_blogs:
             if blog.id not in selected_blogs:
                 blog.series = None          # point the foreign key to null to remove
                 blog.save()
-        
+
         # remove not selected series but used to be in that series
         related_series = Series.objects.filter(sub_series_of=series)
         for sub_series in related_series:

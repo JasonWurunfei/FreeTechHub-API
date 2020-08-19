@@ -3,6 +3,8 @@ from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 from django.conf import settings
 from django.db import models
+from blog.models import Blog
+from question.models import Answer
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
@@ -94,6 +96,19 @@ class User(AbstractUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+    @property
+    def totallikes(self):
+        all_blogs = Blog.objects.filter(owner=self)
+        all_answers = Answer.objects.filter(owner=self)
+        num = 0
+        for blog in all_blogs:
+            num +=blog.like_num
+        for answer in all_answers:
+            num +=answer.like_num
+        return num
+
+
 
 
 class Followership(models.Model):

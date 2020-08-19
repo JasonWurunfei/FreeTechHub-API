@@ -15,6 +15,14 @@ from django.conf import settings
 import random
 import datetime
 import pytz
+import time
+import os
+from collections import Counter
+from blog.models import Blog
+from tag.models import  Tag
+from question.models import Question
+from collections import Counter
+
 
 # Create your views here.
 def Email_Code(len=15):
@@ -417,3 +425,44 @@ class CheckUsernameView(APIView):
             return Response('False')
         else:
             return Response('True')
+
+
+class UploadView(APIView):
+    def post(self, request, format=None):
+        url = "/avatar/"
+        user_ = self.request.user
+        file_obj=request.FILES.get("file")
+        print(type(file_obj))
+        name=file_obj.name.rsplit(".")[1]
+        img_name = int(time.time())
+        dir = os.path.join(os.path.join(settings.BASE_DIR, 'avatar/avatar'),str(img_name)+'.'+name)
+        destination = open(dir,'wb+')
+        for chunk in file_obj.chunks():
+            destination.write(chunk)
+        User.objects.filter(id = user_.id).update(avatar = url + str(img_name)+'.'+name )
+        return Response('True')
+
+
+class GetSelftags(APIView):
+    def get(self, request, format=None):
+        blogs = Blog.objects.filter(owner = self.request.user.id)
+        questions = Question.objects.filter(owner = self.request.user.id)
+        Btags = []
+        Qtags = []
+        Bdata = []
+        Qdata = []
+        for blog in blogs:
+            all_tags = Tag.objects.filter(content_type=6,object_id=blog.id )
+            for all_tag in all_tags:
+                Btags.append(all_tag.tag_name)
+        for question in questions:
+            all_tags = Tag.objects.filter(content_type=17,object_id=question.id)
+            for all_tag in all_tags:
+                Qtags.append(all_tag.tag_name)
+        Bstatistics = dict(Counter(Btags))
+        Qstatistics = dict(Counter(Qtags))
+        for k,v in Bstatistics.items():
+            Bdata.append({'name': k, 'value': v})
+        for k,v in Qstatistics.items():
+            Qdata.append({'name': k, 'value': v})
+        return Response({'Qdata':Qdata,'Bdata':Bdata})

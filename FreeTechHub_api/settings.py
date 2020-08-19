@@ -207,3 +207,8 @@ EMAIL_HOST_PASSWORD = 'VNVCGQOWLXELHRKP'  #邮箱的授权码而非密码
 EMAIL_PORT = 25
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Freetechtub<18358957971@163.com>'
+
+
+# 媒体文件地址
+MEDIA_URL = '/avatar/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'avatar/')
