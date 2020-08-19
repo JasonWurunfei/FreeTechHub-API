@@ -17,7 +17,7 @@ urlpatterns = [
     path('question/', include('question.urls')),
     path('transaction/', include('transaction.urls')),
     path('like/', include('like.urls')),
-
+    path('search/', include('search.urls')),
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-verify/', verify_jwt_token),
     url(r'^api/login/', include('rest_social_auth.urls_jwt')),

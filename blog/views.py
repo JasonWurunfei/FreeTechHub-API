@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import BlogSerializer, SeriesSerializer
-from .models import Blog, Series
+from .models import Blog, Series, View
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
@@ -16,6 +16,20 @@ class BlogViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly
     ]
+
+    """
+    Overide retrieve to support count view number.
+    """
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            View.objects.get(user=request.user, blog=instance)
+        except View.DoesNotExist:
+            View.objects.create(user=request.user, blog=instance)
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         data = {
