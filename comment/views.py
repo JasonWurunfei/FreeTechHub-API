@@ -21,29 +21,33 @@ class CommentViewSet(viewsets.ModelViewSet):
     ]
 
     def create(self, request, *args, **kwargs):
+        print(request.data)
         data = {
             'content': request.data['content'],
             'owner' : request.user.id,
         }
+        sub_comments_of = request.data.get('sub_comments_of')
 
-        if request.data.get('sub_comments_of') is not None:
-            data.update({'sub_comments_of': request.data['sub_comments_of']})
+        if sub_comments_of is not None:
+            data.update({'sub_comments_of': sub_comments_of})
         
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
 
         serializer = self.get_serializer(data=data)
-        try:
-            parentComment = Comment.objects.get(id=data['sub_comments_of'])
-        except Comment.DoesNotExist:
-            parentComment = None
-        
-        if parentComment != None:
-            receiver = parentComment.owner
-            socket = live_sockects.get_socket(receiver.pk)
-        
-        if socket != None:
-            async_to_sync(socket.send_json)({"type": "reply"})
+        if sub_comments_of != None:
+            try:
+                parentComment = Comment.objects.get(id=data['sub_comments_of'])
+            except Comment.DoesNotExist:
+                parentComment = None
+            
+            if parentComment != None:
+                receiver = parentComment.owner
+                socket = live_sockects.get_socket(receiver.pk)
+            
+            if socket != None:
+                async_to_sync(socket.send_json)({"type": "reply"})
+            
 
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
