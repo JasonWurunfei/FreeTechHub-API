@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'like.apps.LikeConfig',
     'comment.apps.CommentConfig',
     'search.apps.SearchConfig',
+    'skilltree.apps.SkilltreeConfig',
 
     # third party packages
     'rest_framework',

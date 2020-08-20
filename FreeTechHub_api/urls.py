@@ -16,6 +16,7 @@ urlpatterns = [
     path('transaction/', include('transaction.urls')),
     path('like/', include('like.urls')),
     path('search/', include('search.urls')),
+    path('skilltree/', include('skilltree.urls')),
     
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-verify/', verify_jwt_token),
