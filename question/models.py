@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from like.models import Like
 from tag.models import Tag
+from comment.models import Comment
 
 class Question(models.Model):
     title = models.CharField(max_length=50)
@@ -15,6 +16,9 @@ class Question(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
     tags = GenericRelation(Tag, related_query_name='question')
     
+    @property
+    def owner_instance(self):
+        return self.owner
 
 class Answer(models.Model):
     content = models.TextField()
@@ -22,6 +26,7 @@ class Answer(models.Model):
     status = models.BooleanField(default=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='answers', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name='answers', on_delete=models.CASCADE)
+    root_comment = models.ForeignKey(Comment, related_name='root_comment', null=True, on_delete=models.CASCADE)
 
     @property
     def content_type(self):
@@ -42,3 +47,8 @@ class Answer(models.Model):
         return Like.objects.filter(content_type=self.content_type,
                                    object_id=self.id,
                                    like_type=False).count()
+
+    @property
+    def owner_instance(self):
+        return self.owner
+    
