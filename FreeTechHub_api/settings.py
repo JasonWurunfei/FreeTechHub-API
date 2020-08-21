@@ -211,5 +211,5 @@ DEFAULT_FROM_EMAIL = 'Freetechtub<18358957971@163.com>'
 
 
 # 媒体文件地址
-MEDIA_URL = '/avatar/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'avatar/')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

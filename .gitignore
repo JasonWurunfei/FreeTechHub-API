@@ -12,6 +12,12 @@ static
 !**/migrations
 !**/migrations/__init__.py
 
+
+# avatar
+**/media/**
+!**/media
+!**/media/avatar/default.png
+
 # Backup files # 
 *.bak 
 

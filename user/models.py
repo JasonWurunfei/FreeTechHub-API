@@ -72,7 +72,7 @@ class User(AbstractUser):
     major   = models.CharField(max_length=30, blank=True, default='')
     grade   = models.CharField(max_length=20, blank=True, default='')
     bio     = models.TextField(blank=True, default='')
-    avatar  = ProcessedImageField(upload_to='avatar/',
+    avatar  = ProcessedImageField(upload_to='media/',
                                   default='/avatar/default.png',
                                   verbose_name='avatar',
                                   #图片将处理成100 x 100的尺寸
@@ -100,15 +100,19 @@ class User(AbstractUser):
     @property
     def totallikes(self):
         all_blogs = Blog.objects.filter(owner=self)
-        all_answers = Answer.objects.filter(owner=self)
+        num = 0
+        for blog in all_blogs:
+            num +=blog.view_num
+        return num
+
+    @property
+    def totalviews(self):
+        all_blogs = Blog.objects.filter(owner=self)
         num = 0
         for blog in all_blogs:
             num +=blog.like_num
-        for answer in all_answers:
-            num +=answer.like_num
+
         return num
-
-
 
 
 class Followership(models.Model):
