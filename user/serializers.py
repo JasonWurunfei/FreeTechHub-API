@@ -13,8 +13,8 @@ class EmailValidSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-        totallikes = serializers.IntegerField(read_only=True)
-        totalviews = serializers.IntegerField(read_only=True)
+    totallikes = serializers.IntegerField(read_only=True)
+    totalviews = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = User
