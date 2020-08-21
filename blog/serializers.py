@@ -2,17 +2,18 @@ from rest_framework import serializers
 from .models import Blog, Series
 from tag.serializers import TagSerializer
 from comment.serializers import CommentSerializer
+from user.serializers import UserSerializer
 
 class BlogSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
-
+    owner_instance = UserSerializer(read_only=True)
     class Meta:
         model = Blog
         fields = [ "id", "title", "content",
                    "date", "view_num", "owner",
                    "series", "tags", "like_num",
                    "dislike_num", "content_type_id",
-                   "root_comment"]
+                   "root_comment", "owner_instance"]
         
         extra_kwargs = {
             'like_num':        {'read_only': True},

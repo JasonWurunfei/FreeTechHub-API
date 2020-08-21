@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from .serializers import UserSerializer, FollowershipSerializer
 from .serializers import FriendRequestSerializer, FriendshipSerializer, EmailValidSerializer
 from .models import User, Followership, FriendRequest, Friendship, MyUserManager,EmailValid
@@ -22,6 +23,14 @@ import random
 import pytz
 import time
 import os
+
+
+from rest_framework.pagination import PageNumberPagination
+class ChatPagination(PageNumberPagination):
+    page_size = 4 # 表示每页的默认显示数量
+    page_size_query_param = 'page_size' # 表示url中每页数量参数
+    page_query_param = 'p' # 表示url中的页码参数
+    max_page_size = 100  # 表示每页最大显示数量，做限制使用，避免突然大量的查询数据，数据库崩溃
 
 
 # Create your views here.
@@ -62,38 +71,60 @@ class FollowershipViewSet(viewsets.ModelViewSet):
     ]
 
 
-class FollowershowView(APIView):
-    renderer_classes = [JSONRenderer]
+class FollowershipListView(APIView):
 
-# Gets a list of follower for the relevant user
-    def get(self, request, format=None):
-        response = {'status': 100, 'data': None}
-        user = self.request.user
-        followers = Followership.objects.filter(following_id=user.id)
-        followerList = []
-        for follower in followers:
-            followerList.append({'follower_name':follower.follower.username,
-            'user_bio':follower.follower.bio,'id':follower.follower.pk})
-        response['data'] = followerList
-        return JsonResponse(response, safe=False)
+    def get(self, request, user_id, format=None):
+        
+        followings = []
+        following_followerships = Followership.objects.filter(follower_id=user_id)
+        for followership in following_followerships:
+            followings.append(UserSerializer(followership.following).data)
+        
+        followers = []
+        follower_followerships = Followership.objects.filter(following_id=user_id)
+        for followership in follower_followerships:
+            followers.append(UserSerializer(followership.follower).data)
+        
+        content = {
+            "followings": followings,     # users that this user follows
+            "followers": followers,     # users that follow this user
+        }
+        return Response(content)
 
 
-class FollowingshowView(APIView):
-    renderer_classes = [JSONRenderer]
+class UnfollowView(APIView):
 
-# Gets a list of following for the relevant user
-    def get(self, request, format=None):
-        response = {'status': 100, 'data': None}
-        user = self.request.user
-        followings = Followership.objects.filter(follower_id=user.id)
+    """
+    this view is used to delete a followership to unfollow
+    """
+    def post(self, request, format=None):
+        following_id = request.data['following_id']
+        follower_id = request.data['follower_id']
 
-        followingList = []
-        for following in followings:
-            followingList.append({'following_id':following.id,
-            'following_name':following.following.username,
-            'user_bio':following.following.bio,'id':following.following.pk})
-        response['data'] = followingList
-        return JsonResponse(response, safe=False)
+        try:
+            followership = Followership.objects.get(
+                follower_id=follower_id, following_id=following_id
+            )
+        except Followership.DoesNotExist:
+            raise Http404
+
+        followership.delete()
+        return Response("followership deleted", status.HTTP_200_OK)
+        
+
+class FollowershipCheckView(APIView):
+    """
+    this view is check if a user is followed another user
+    """
+    def get(self, request, follower_id, following_id, format=None):
+        try:
+            followership = Followership.objects.get(
+                                follower_id=follower_id,
+                                following_id=following_id
+                            )
+        except Followership.DoesNotExist:
+            return Response(False, status.HTTP_200_OK)
+        return Response(True, status.HTTP_200_OK)
 
 
 from websocket.middleware import live_sockects

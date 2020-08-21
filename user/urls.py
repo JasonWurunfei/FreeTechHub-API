@@ -16,8 +16,10 @@ router.register('chat', views.ChatViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('getself/', views.GetSelfView.as_view()),
-    path('getfollowing/', views.FollowingshowView.as_view()),
-    path('getfollower/', views.FollowershowView.as_view()),
+    path('getfollowerships/<int:user_id>/', views.FollowershipListView.as_view()),
+    path('unfollow/', views.UnfollowView.as_view()),
+    path('followship_check/<int:follower_id>/<int:following_id>/',
+          views.FollowershipCheckView.as_view()),
     path('changepassword/', views.ChangePasswordView.as_view()),
     path('changeemail/', views.ChangeEmailView.as_view()),
     path('checkchangeemail/', views.CheckChangeemailView.as_view()),

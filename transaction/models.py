@@ -16,10 +16,17 @@ class Transaction(models.Model):
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
     description = models.TextField()
 
+    class Meta:
+        ordering = ['-time']
+
     def make_transaction(self):
         self.user.balance += self.amount
         if self.user.balance < 0:
             raise Exception('not enough balance!')
         else:
             self.user.save()
+
+    @property
+    def user_instance(self):
+        return self.user
         

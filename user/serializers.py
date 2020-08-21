@@ -5,23 +5,17 @@ from .models import (User, Followership,
                      EmailValid, Chat, Message)
 
 
-class FollowershipSerializer(ModelSerializer):
-    class Meta:
-        model = Followership
-        fields = '__all__'
-
-
 class EmailValidSerializer(ModelSerializer):
     class Meta:
         model = EmailValid
         fields = '__all__'
 
 
+
 class UserSerializer(ModelSerializer):
-    following_users = FollowershipSerializer(many=True, required=False)
-    follower_users =  FollowershipSerializer(many=True, required=False)
-    totallikes = serializers.IntegerField(read_only=True)
-    totalviews = serializers.IntegerField(read_only=True)
+        totallikes = serializers.IntegerField(read_only=True)
+        totalviews = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = User
         exclude = ['password']
@@ -39,6 +33,14 @@ class UserSerializer(ModelSerializer):
             'user_permissions'  : {'read_only': True},
         }
 
+class FollowershipSerializer(ModelSerializer):
+    following_user_instance = UserSerializer(read_only=True)
+    follower_user_instance = UserSerializer(read_only=True)
+    class Meta:
+        model = Followership
+        fields = ['follower', 'following',
+                  'following_user_instance',
+                  'follower_user_instance']
 
 class FriendRequestSerializer(serializers.ModelSerializer):
     sender_instance    = UserSerializer(read_only=True)
