@@ -13,9 +13,9 @@ static
 
 
 # avatar
-**/media/**
-!**/media
-!**/media/avatar/default.png
+**/avatar/**
+!**/avatar
+!**/avatar/default.png
 
 # Backup files # 
 *.bak 
