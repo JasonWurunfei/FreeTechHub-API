@@ -11,5 +11,5 @@ router.register('modifyrequest', views.ModifyRequestViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('getskilltree/<int:tree_id>/', views.SkilltreeView.as_view()),
+    path('skilltree_handler/<int:tree_id>/', views.SkilltreeView.as_view()),
 ]

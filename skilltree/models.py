@@ -4,7 +4,7 @@ from tag.models import Tag
 
 
 class Node(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
         return f"<Node {self.id}: {self.name}>"

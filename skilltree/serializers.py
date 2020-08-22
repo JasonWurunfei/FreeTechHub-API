@@ -19,7 +19,8 @@ class NodeToNodeSerializer(serializers.ModelSerializer):
 class SkillTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SkillTree
-        fields = ['name', 'is_under_changing', 'last_modified', 'root_node']
+        fields = ['id', 'name', 'is_under_changing',
+                  'last_modified', 'root_node']
 
 
 class LightNodeSerializer(serializers.ModelSerializer):
