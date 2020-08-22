@@ -506,9 +506,7 @@ class UploadAvatatrView(APIView):
 class GetSelftags(APIView):
     def get(self, request, user_id, format=None):
         answer_count = Answer.objects.filter(owner_id=user_id).count()
-        print(answer_count)
         accept_count = Answer.objects.filter(owner_id=user_id, status=True).count()
-        print(accept_count)
         acceptance_rate = 0 if accept_count == 0 else '{:.2%}'.format(accept_count/answer_count)
         blogs = Blog.objects.filter(owner_id=user_id)
         questions = Question.objects.filter(owner_id=user_id)
