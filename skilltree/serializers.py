@@ -19,8 +19,11 @@ class NodeToNodeSerializer(serializers.ModelSerializer):
 class SkillTreeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SkillTree
-        fields = ['id', 'name', 'is_under_changing',
-                  'last_modified', 'root_node']
+        fields = [
+            'id', 'name', 'is_under_changing',
+            'last_modified', 'root_node',
+            'agree_num', 'disagree_num'
+        ]
 
 
 class LightNodeSerializer(serializers.ModelSerializer):
@@ -32,4 +35,8 @@ class LightNodeSerializer(serializers.ModelSerializer):
 class ModifyRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModifyRequest
-        fields = "__all__"
+        fields = [
+            'id', 'modify_reason', 'datetime',
+            'new_tree_root', 'target_tree', 'owner',
+            'agree_num', 'disagree_num'
+        ]

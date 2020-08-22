@@ -11,7 +11,9 @@ class Like(models.Model):
                                         on_delete=models.CASCADE)
 
     limit = models.Q(app_label='blog',      model='blog') | \
-            models.Q(app_label='question',  model='answer')
+            models.Q(app_label='question',  model='answer') | \
+            models.Q(app_label='skilltree', model='skilltree') | \
+            models.Q(app_label='skilltree', model='modifyrequest')
 
     content_type    = models.ForeignKey(ContentType,
                                         on_delete=models.CASCADE,
