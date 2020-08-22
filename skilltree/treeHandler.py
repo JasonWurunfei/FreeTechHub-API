@@ -100,17 +100,17 @@ class SkillTreeHandler:
         self.tree_obj = skilltree
         return skilltree
 
-    def query_sub_ntn(self, node):
+    def query_sub_ntns(self, node):
         """
         'ntn' stands for node_to_node. this method will
         return all the node_to_nodes where the input node
         is parent in this tree.
         """
-        sub_ntn = self.NodeToNode_class.objects.filter(
-                                parent=node,
-                                beloging_tree_id=self.tree_id
-                            )
-        return sub_ntn
+        sub_ntns = self.NodeToNode_class.objects.filter(
+                            parent=node,
+                            beloging_tree_id=self.tree_id
+                        )
+        return sub_ntns
 
     def get_tree_obj(self):
         if self.tree_obj is None:
@@ -118,31 +118,31 @@ class SkillTreeHandler:
             return tree_obj
         return self.tree_obj
 
-    def get_serialized_tree(self, node):
-        sub_ntns = self.query_sub_ntn(node)
-        sub_nodes = []
+    def get_tree_structure(self, node):
+        sub_ntns = self.query_sub_ntns(node)
+        sub_trees = []
         if len(sub_ntns) == 0:
             return {
                 "node": self.Node_serializer(node).data,
-                "sub_trees": sub_nodes
+                "sub_trees": sub_trees
             }
         
         for ntn in sub_ntns:
             child_node = ntn.child
-            sub_tree = self.get_serialized_tree(child_node)
-            sub_nodes.append(sub_tree)
+            sub_tree = self.get_tree_structure(child_node)
+            sub_trees.append(sub_tree)
         
         return {
             "node": self.Node_serializer(node).data,
-            "sub_trees": sub_nodes
+            "sub_trees": sub_trees
         }
 
-    def get_tree(self):
+    def get_serialized_tree(self):
         tree_obj = self.get_tree_obj()
         root_node = tree_obj.root_node
         data = self.SkillTree_serializer(tree_obj).data
         data.update({
-            "tree_structure": self.get_serialized_tree(root_node)
+            "tree_structure": self.get_tree_structure(root_node)
         })
         return data
 

@@ -17,14 +17,14 @@ class SkilltreeView(APIView):
 
     def get(self, request, tree_id, format=None):
         tree_handler = SkillTreeHandler(tree_id)
-        return Response(tree_handler.get_tree(), status.HTTP_200_OK)
+        return Response(tree_handler.get_serialized_tree(), status.HTTP_200_OK)
 
     def post(self, request, tree_id, format=None):
         tree_handler = SkillTreeHandler(tree_id)
         modify_queue = request.data['modify_queue']
         tree_handler.read_modify(modify_queue)
         tree_handler.commit()
-        return Response(tree_handler.get_tree(), status.HTTP_202_ACCEPTED)
+        return Response(tree_handler.get_serialized_tree(), status.HTTP_202_ACCEPTED)
 
 
 class NodeViewSet(viewsets.ModelViewSet):
