@@ -203,12 +203,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 AUTH_USER_MODEL = 'user.User'
 
 #stmp account
-EMAIL_HOST = 'smtp.qq.com'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
-EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_EMAIL_USER')
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST_USER = '18358957971@163.com'
+EMAIL_HOST_PASSWORD = 'VNVCGQOWLXELHRKP'  #閭®绠辩殑鎺堟潈鐮佽€岄潪瀵嗙爜
+EMAIL_PORT = 25
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Freetechtub<18358957971@163.com>'
+# EMAIL_HOST = 'smtp.qq.com'
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
+# EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
+# EMAIL_USE_SSL = True
+# DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_EMAIL_USER')
 
 # 媒体文件地址
 MEDIA_URL = '/media/'

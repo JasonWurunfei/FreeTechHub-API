@@ -7,8 +7,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer, FollowershipSerializer
-from .serializers import FriendRequestSerializer, FriendshipSerializer, EmailValidSerializer
-from .models import User, Followership, FriendRequest, Friendship, MyUserManager,EmailValid
+from .serializers import FriendRequestSerializer, FriendshipSerializer, ValidationRequestSerializer
+from .models import User, Followership, FriendRequest, Friendship, MyUserManager,ValidationRequest
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 from django.utils.timezone import localtime
@@ -16,8 +16,10 @@ from django.conf import settings
 from blog.models import Blog
 from tag.models import  Tag
 from collections import Counter
-from question.models import Question
+from django.db.utils import IntegrityError
+from question.models import Question, Answer
 from django.contrib.contenttypes.models import ContentType
+import string
 import datetime
 import random
 import pytz
@@ -34,9 +36,9 @@ class ChatPagination(PageNumberPagination):
 
 
 # Create your views here.
-class EmailValidViewSet(viewsets.ModelViewSet):
-        queryset = EmailValid.objects.all()
-        serializer_class = EmailValidSerializer
+class ValidationRequestViewSet(viewsets.ModelViewSet):
+        queryset = ValidationRequest.objects.all()
+        serializer_class = ValidationRequestSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -74,17 +76,17 @@ class FollowershipViewSet(viewsets.ModelViewSet):
 class FollowershipListView(APIView):
 
     def get(self, request, user_id, format=None):
-        
+
         followings = []
         following_followerships = Followership.objects.filter(follower_id=user_id)
         for followership in following_followerships:
             followings.append(UserSerializer(followership.following).data)
-        
+
         followers = []
         follower_followerships = Followership.objects.filter(following_id=user_id)
         for followership in follower_followerships:
             followers.append(UserSerializer(followership.follower).data)
-        
+
         content = {
             "followings": followings,     # users that this user follows
             "followers": followers,     # users that follow this user
@@ -110,7 +112,7 @@ class UnfollowView(APIView):
 
         followership.delete()
         return Response("followership deleted", status.HTTP_200_OK)
-        
+
 
 class FollowershipCheckView(APIView):
     """
@@ -311,66 +313,47 @@ async def WebsocketView(socket, live_sockects):
 
 
 #yy's function
-def Gudge(tags):
+def judge(tags):
     data = []
-    datas =[]
-    Bstatistics = dict(sorted(dict(Counter(tags)).items(), key=lambda item:item[1],reverse=True))
+    tag_count = []
+    count = dict(sorted(dict(Counter(tags)).items(), key=lambda item:item[1],reverse=True))
     if 0< len(tags) < 6:
-        for k,v in Bstatistics.items():
-            datas.append({'name': k, 'value': v})
+        for k,v in count.items():
+            tag_count.append({'name': k, 'value': v})
     elif len(tags) == 0:
-        datas.append({'name': "none", 'value': 0})
+        tag_count.append({'name': "none", 'value': 0})
     else:
         others = 0
-        for k,v in Bstatistics.items():
+        for k,v in count.items():
             data.append({'name': k, 'value': v})
-        for i in data[0:5]:
-            datas.append(i)
         for i in data[6:]:
             others += i['value']
-        datas.append({'name': "others", 'value': others})
-    return datas
+        tag_count = data[0:5]
+        tag_count.append({'name': "others", 'value': others})
+    return tag_count
 
 
-def TimeOut(email_obj):
-    now = datetime.datetime.now()+datetime.timedelta(minutes=-5)
-    now = now.replace(tzinfo=pytz.timezone('Asia/Shanghai'))
-    T1 = now.strftime("%Y-%m-%d-%H-%M-%S")
-    T2 = localtime(email_obj.time.replace(tzinfo=pytz.timezone('Asia/Shanghai')))
-    T2 = T2.strftime("%Y-%m-%d-%H-%M-%S")
-    T1 = [int(e) for e in T1.split('-')]
-    T2 = [int(e) for e in T2.split('-')]
-    return T1<T2
-
-def Email_Code(len=15):
-    code_list = []
-    for i in range(10):
-        code_list.append(str(i))
-    for i in range(65, 91):
-        code_list.append(chr(i))
-    for i in range(97, 123):
-        code_list.append(chr(i))
-    myslice = random.sample(code_list, len)
-    code_ = ''.join(myslice)
-    return code_
+def generateKey(length):
+    char_set = string.ascii_letters + string.digits
+    letters = random.sample(char_set, length)
+    keys = "".join(letters)
+    return keys
 
 
-def SendEmail(user,email,type):
-    code1 = Email_Code()
-    code2 = Email_Code()
-    if type == True:
-        emailvate = EmailValid.objects.create(onwer = user, email_address=email, value=code1, type="ForgetPassowrd")
-        ret = "Your verification code is :http://localhost:8080/#/forgetpassword/{}/{}/{}".format(code1,emailvate.onwer.id,code2)
-    elif type == False:
-        emailvate = EmailValid.objects.create(onwer = user, email_address=email, value=code1, type="Verify")
-        ret = "Your verification code is :http://localhost:8080/#/active/{}/{}".format(code1,emailvate.onwer.id)
-    else:
-        emailvate = EmailValid.objects.create(onwer = user, email_address=email, value=code1, type="Verify")
-        ret = "Your verification code is :http://localhost:8080/#/active/{}/{}/{}".format(code1,emailvate.onwer.id,email)
+def send_email(user, email, request_type):
+    code = generateKey(20)
+    if request_type == "forget_password":
+        emailvate = ValidationRequest.objects.create(owner=user, email=email, code=code, request_type="ForgetPassowrd")
+        ret = f"Your verification code is :http://localhost:8080/#/forgetpassword/{code}/{emailvate.owner.id}/"
+    elif request_type == "register":
+        emailvate = ValidationRequest.objects.create(owner=user, email=email, code=code, request_type="Verify")
+        ret = f"Your verification code is :http://localhost:8080/#/active/{code}/{emailvate.owner.id}"
+    elif request_type == "change_email":
+        emailvate = ValidationRequest.objects.create(owner=user, email=email, code=code, request_type="Verify")
+        ret = f"Your verification code is :http://localhost:8080/#/active/{code}/{emailvate.owner.id}/{email}"
     my_email = send_mail('Activation validation', ret, settings.DEFAULT_FROM_EMAIL, [email])
 
 
-#check oldpassword right or not
 class CheckPasswordView(APIView):
     def post(self, request, format=None):
         user = self.request.user
@@ -381,12 +364,11 @@ class CheckPasswordView(APIView):
             return Response('false', status=status.HTTP_200_OK)
 
 
-
 class ChangePasswordView(APIView):
-#ChangePassword
+    #ChangePassword
     def post(self, request, format=None):
         old_password = request.data.get('oldpassword')
-        new_password = request.data.get('newpassword1')
+        new_password = request.data.get('newpassword')
         user = self.request.user
         if user.check_password(old_password):
             request.user.set_password(new_password)
@@ -399,8 +381,8 @@ class ChangePasswordView(APIView):
 class CheckChangeemailView(APIView):
     def post(self, request, format=None):
         email = request.data.get('email')
-        user_ = self.request.user
-        user = User.objects.exclude(id = user_.id)
+        user = self.request.user
+        user = User.objects.exclude(id = user.id)
         count = user.filter(email=email).count()
         return Response({"count":count})
 
@@ -414,8 +396,8 @@ class ChangeEmailView(APIView):
         user_ = self.request.user
         if user_.check_password(password):
             user = User.objects.get(id = user_.id)
-            type = ''
-            SendEmail(user,email1,type)
+            request_type = 'change_email'
+            send_email(user,email1,request_type)
             return Response('true',status=status.HTTP_200_OK)
         else:
             return Response('false',status=status.HTTP_404_NOT_FOUND)
@@ -434,113 +416,100 @@ class ResetPasswordView(APIView):
 
 
 class RegisterView(APIView):
-# To achieve this registration for user
     def post(self, request, format=None):
         username = request.data.get('username')
         email = request.data.get('email')
         password = request.data.get('password')
-        if email:
-            type=False
-            user = User.objects.create_user(username,email,password)
-            SendEmail(user,email,type)
-            return Response('true',  status=status.HTTP_200_OK)
-        else:
-            return Response('false', status=status.HTTP_404_NOT_FOUND)
+        request_type = "register"
+        try:
+            user = User.objects.create_user(username, email, password)
+        except IntegrityError:
+            return Response(IntegrityError.message, status=status.HTTP_400_BAD_REQUEST)
+        send_email(user, email, request_type)
+        return Response('true', status=status.HTTP_200_OK)
 
 
 class ValidateCodeView(APIView):
-#Verification code
     def post(self, request, format=None):
         code = request.data.get('code')
         user_id = request.data.get('user_id')
-        type = request.data.get('type')
-        if type == "validate":
-            email_obj = EmailValid.objects.filter(onwer = user_id).last()
-            if(email_obj.value == code):
-                timeout = TimeOut(email_obj)
-                if timeout:
-                    user = User.objects.filter(id = user_id, email=email_obj.email_address).update(is_verified = True)
-                    return Response('true')
-                else:
-                    return Response('false')
+        request_type = request.data.get('type')
+        latest_request = ValidationRequest.objects.filter(owner_id=user_id).last()
+        user = User.objects.filter(id=user_id)
+
+        if request_type == "validate":
+            if latest_request.is_valid(code):
+                user.update(is_verified = True)
+                return Response('true', status=status.HTTP_200_OK)
             else:
-                return Response('wrong code')
-        elif type == "changeemail":
-            user_ = self.request.user
-            email =  request.data.get('email')
-            print(email)
-            email_obj = EmailValid.objects.filter(onwer = user_id).last()
-            if(email_obj.value == code):
-                timeout = TimeOut(email_obj)
-                if timeout:
-                    user = User.objects.filter(id = user_id).update(email = email)
-                    print(user)
-                    return Response('true')
-                else:
-                    return Response('false')
+                return Response('false')
+
+        elif request_type == "change_email":
+            email = request.data.get('email')
+            if latest_request.is_valid(code):
+                user.update(email=email)
+                return Response('true', status=status.HTTP_200_OK)
             else:
-                return Response('wrong code')
-        elif type == "resend":
-            email_obj = EmailValid.objects.get(onwer=user_id, value=code)
-            email = email_obj.email_address
-            user = User.objects.get(email=email, id=user_id)
-            type = False
-            SendEmail(user,email,type)
-            return Response('true')
-        else:
-            email_obj = EmailValid.objects.get(onwer=user_id, value=code)
-            email = email_obj.email_address
-            user = User.objects.get(id=user_id)
-            type = ''
-            SendEmail(user,email,type)
-            return Response('true')
+                return Response('false')
+
+        elif request_type == "resend_register":
+            email = lastest_request.email
+            request_type = "register"
+            send_email(user, email, request_type)
+            return Response('true', status=status.HTTP_200_OK)
+
+        elif request_type == "resend_change_email":
+            email = lastest_request.email
+            request_type = "change_email"
+            send_email(user, email, request_type)
+            return Response('true', status=status.HTTP_200_OK)
 
 
-class Send_changepassword(APIView):
-#Send changepassword validate email
+class SendChangePassword(APIView):
+    # Send changepassword validate email
     def post(self, request, format=None):
         email = request.data.get('email')
-        user = User.objects.get(email = email)
-        if user !='':
-            type = True
-            SendEmail(user,email,type)
-            return Response("successful", status=status.HTTP_200_OK)
-        else:
-            return Response("error", status=status.HTTP_404_NOT_FOUND)
+        user = User.objects.get(email=email)
+        request_type = "forget_password"
+        send_email(user, email, request_type)
+        return Response("successful", status=status.HTTP_200_OK)
 
 
 class CheckRepeatView(APIView):
-#Whether the user name and email are duplicate
+    # Whether the user name and email are duplicate
     def post(self, request, format=None):
-        type = request.data.get('type')
-        name = request.data.get('value')
-        if type == "username" :
-            count = User.objects.filter(username=name).count()
-        else:
-            count = User.objects.filter(email=name).count()
+        request_type = request.data.get('type')
+        value = request.data.get('value')
+        if request_type == "username" :
+            count = User.objects.filter(username=value).count()
+        elif request_type == "email":
+            count = User.objects.filter(email=value).count()
         return Response({"count":count})
 
 
-class UploadView(APIView):
-#upload avatar
+class UploadAvatatrView(APIView):
     def post(self, request, format=None):
         url = "/avatar/"
-        user_ = self.request.user
-        file_obj=request.FILES.get("file")
-        print(type(file_obj))
-        name=file_obj.name.rsplit(".")[1]
-        img_name = int(time.time())
-        dir = os.path.join(os.path.join(settings.BASE_DIR, 'avatar/avatar'),str(img_name)+'.'+name)
-        destination = open(dir,'wb+')
+        user = self.request.user
+        file_obj = request.FILES.get("file")
+        suffix = file_obj.name.rsplit(".")[1]
+        img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + str(user.id)
+        dir = os.path.join(os.path.join(settings.BASE_DIR, 'media/avatar'), img_name+'.'+suffix)
+        destination = open(dir, 'wb+')
         for chunk in file_obj.chunks():
             destination.write(chunk)
-        User.objects.filter(id = user_.id).update(avatar = url + str(img_name)+'.'+name )
+        User.objects.filter(id=user.id).update(avatar=url+img_name+'.'+suffix)
+        destination.close()
         return Response('True')
 
 
 class GetSelftags(APIView):
-#GetSelftags
     def get(self, request, user_id, format=None):
+        answer_count = Answer.objects.filter(owner_id=user_id).count()
+        print(answer_count)
+        accept_count = Answer.objects.filter(owner_id=user_id, status=True).count()
+        print(accept_count)
+        acceptance_rate = 0 if accept_count == 0 else '{:.2%}'.format(accept_count/answer_count)
         blogs = Blog.objects.filter(owner_id=user_id)
         questions = Question.objects.filter(owner_id=user_id)
         blog_type = ContentType.objects.get(
@@ -552,13 +521,13 @@ class GetSelftags(APIView):
         Bdata = []
         Qdata = []
         for blog in blogs:
-            all_tags = Tag.objects.filter(content_type=blog_type,object_id=blog.id)
-            for all_tag in all_tags:
-                Btags.append(all_tag.tag_name)
+            tags = Tag.objects.filter(content_type=blog_type,object_id=blog.id)
+            for tag in tags:
+                Btags.append(tag.tag_name)
         for question in questions:
-            all_tags = Tag.objects.filter(content_type=question_type,object_id=question.id)
-            for all_tag in all_tags:
-                Qtags.append(all_tag.tag_name)
-        Bdata = Gudge(Btags)
-        Qdata = Gudge(Qtags)
-        return Response({'Qdata':Qdata,'Bdata':Bdata})
+            tags = Tag.objects.filter(content_type=question_type,object_id=question.id)
+            for tag in tags:
+                Qtags.append(tag.tag_name)
+        Bdata = judge(Btags)
+        Qdata = judge(Qtags)
+        return Response({'Qdata': Qdata, 'Bdata': Bdata, 'acceptance_rate': acceptance_rate})

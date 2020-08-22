@@ -2,12 +2,12 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from .models import (User, Followership,
                      FriendRequest, Friendship,
-                     EmailValid, Chat, Message)
+                     ValidationRequest, Chat, Message)
 
 
-class EmailValidSerializer(ModelSerializer):
+class ValidationRequestSerializer(ModelSerializer):
     class Meta:
-        model = EmailValid
+        model = ValidationRequest
         fields = '__all__'
 
 

@@ -5,6 +5,10 @@ from django.conf import settings
 from django.db import models
 from blog.models import Blog
 from question.models import Answer
+import datetime
+import random
+import pytz
+import time
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
@@ -128,7 +132,7 @@ class Followership(models.Model):
     @property
     def following_user_instance(self):
         return self.following
-    
+
     @property
     def follower_user_instance(self):
         return self.follower
@@ -208,11 +212,21 @@ class Message(models.Model):
                                         on_delete=models.CASCADE)
 
 
-class EmailValid(models.Model):
-    onwer = models.ForeignKey(settings.AUTH_USER_MODEL,
+class ValidationRequest(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                                      related_name='onwer',
                                      on_delete=models.CASCADE,null=True)
-    value = models.CharField(max_length=32)
-    email_address = models.CharField(max_length=32)
-    type = models.TextField(null=True)
-    time = models.DateTimeField(auto_now_add=True)
+    code = models.CharField(max_length=30)
+    email = models.CharField(max_length=30)
+    request_type = models.CharField(max_length=30,null=True)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_timeout(self):
+        now = datetime.datetime.now()
+        now = now.replace(tzinfo=pytz.timezone('Asia/Shanghai'))
+        due_time = (self.datetime + datetime.timedelta(minutes=55)).replace(tzinfo=pytz.timezone('Asia/Shanghai'))
+        return due_time < now
+
+    def is_valid(self, code):
+        return True if self.code == code and not self.is_timeout else False
