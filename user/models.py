@@ -102,7 +102,7 @@ class User(AbstractUser):
         return self.is_admin
 
     @property
-    def totallikes(self):
+    def totalviews(self):
         all_blogs = Blog.objects.filter(owner=self)
         num = 0
         for blog in all_blogs:
@@ -110,7 +110,7 @@ class User(AbstractUser):
         return num
 
     @property
-    def totalviews(self):
+    def totallikes(self):
         all_blogs = Blog.objects.filter(owner=self)
         num = 0
         for blog in all_blogs:
@@ -140,14 +140,14 @@ class Followership(models.Model):
 class FriendRequest(models.Model):
     sender          = models.ForeignKey(settings.AUTH_USER_MODEL,
                                         related_name="sent_request",
-                                        on_delete=models.CASCADE,null=True)
+                                        on_delete=models.CASCADE)
 
     receiver        = models.ForeignKey(settings.AUTH_USER_MODEL,
                                         related_name="received_request",
-                                        on_delete=models.CASCADE,null=True)
+                                        on_delete=models.CASCADE)
 
     datetime        = models.DateTimeField(auto_now_add=True)
-    note            = models.TextField(null=True)
+    note            = models.TextField()
 
     STATES_CHOICES = [
         ('A', 'approved'),
@@ -175,13 +175,11 @@ class FriendRequest(models.Model):
 class Friendship(models.Model):
     friend_1 = models.ForeignKey(settings.AUTH_USER_MODEL,
                                  related_name="friendship_1",
-                                 on_delete=models.CASCADE,
-                                 null=True)
+                                 on_delete=models.CASCADE)
 
     friend_2 = models.ForeignKey(settings.AUTH_USER_MODEL,
                                  related_name="friendship_2",
-                                 on_delete=models.CASCADE,
-                                 null=True)
+                                 on_delete=models.CASCADE)
 
     @property
     def friend_instance_1(self):
@@ -215,17 +213,17 @@ class Message(models.Model):
 class ValidationRequest(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                                      related_name='onwer',
-                                     on_delete=models.CASCADE,null=True)
+                                     on_delete=models.CASCADE)
     code = models.CharField(max_length=30)
     email = models.CharField(max_length=30)
-    request_type = models.CharField(max_length=30,null=True)
+    request_type = models.CharField(max_length=30)
     datetime = models.DateTimeField(auto_now_add=True)
 
     @property
     def is_timeout(self):
         now = datetime.datetime.now()
         now = now.replace(tzinfo=pytz.timezone('Asia/Shanghai'))
-        due_time = (self.datetime + datetime.timedelta(minutes=55)).replace(tzinfo=pytz.timezone('Asia/Shanghai'))
+        due_time = (self.datetime + datetime.timedelta(minutes=5)).replace(tzinfo=pytz.timezone('Asia/Shanghai'))
         return due_time < now
 
     def is_valid(self, code):

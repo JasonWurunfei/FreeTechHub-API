@@ -9,7 +9,7 @@ router.register('followership', views.FollowershipViewSet)
 router.register('friendrequest', views.FriendRequestViewSet)
 router.register('friendship', views.FriendshipViewSet)
 router.register('message', views.MessageViewSet)
-router.register('validationRequest',views.ValidationRequestViewSet)
+router.register('validationRequest', views.ValidationRequestViewSet)
 router.register('chat', views.ChatViewSet)
 
 

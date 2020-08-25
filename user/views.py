@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer, FollowershipSerializer
 from .serializers import FriendRequestSerializer, FriendshipSerializer, ValidationRequestSerializer
-from .models import User, Followership, FriendRequest, Friendship, MyUserManager,ValidationRequest
+from .models import User, Followership, FriendRequest, Friendship, MyUserManager, ValidationRequest
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 from django.utils.timezone import localtime
@@ -392,12 +392,12 @@ class ChangeEmailView(APIView):
     def post(self, request, format=None):
         data = request.data
         password = data.get('password')
-        email1 = data.get('email1')
-        user_ = self.request.user
-        if user_.check_password(password):
-            user = User.objects.get(id = user_.id)
+        email = data.get('email')
+        user = self.request.user
+        if user.check_password(password):
+            user = User.objects.get(id = user.id)
             request_type = 'change_email'
-            send_email(user,email1,request_type)
+            send_email(user,email,request_type)
             return Response('true',status=status.HTTP_200_OK)
         else:
             return Response('false',status=status.HTTP_404_NOT_FOUND)
@@ -436,7 +436,7 @@ class ValidateCodeView(APIView):
         request_type = request.data.get('type')
         latest_request = ValidationRequest.objects.filter(owner_id=user_id).last()
         user = User.objects.filter(id=user_id)
-
+        user_ = User.objects.get(id=user_id)
         if request_type == "validate":
             if latest_request.is_valid(code):
                 user.update(is_verified = True)
@@ -453,15 +453,15 @@ class ValidateCodeView(APIView):
                 return Response('false')
 
         elif request_type == "resend_register":
-            email = lastest_request.email
+            email = latest_request.email
             request_type = "register"
-            send_email(user, email, request_type)
+            send_email(user_, email, request_type)
             return Response('true', status=status.HTTP_200_OK)
 
         elif request_type == "resend_change_email":
-            email = lastest_request.email
+            email = latest_request.email
             request_type = "change_email"
-            send_email(user, email, request_type)
+            send_email(user_, email, request_type)
             return Response('true', status=status.HTTP_200_OK)
 
 
