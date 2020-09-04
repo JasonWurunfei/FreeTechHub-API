@@ -7,6 +7,7 @@ from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from comment.models import Comment
 
 
 class BlogViewSet(viewsets.ModelViewSet):
@@ -44,6 +45,8 @@ class BlogViewSet(viewsets.ModelViewSet):
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
 
+        root_comment = Comment.objects.create(content='', owner=request.user, sub_comments_of=None)
+        data.update({'root_comment': root_comment.id})
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
