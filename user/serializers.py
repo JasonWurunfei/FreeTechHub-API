@@ -2,10 +2,19 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from .models import (User, Followership,
                      FriendRequest, Friendship,
-                     Chat, Message)
+                     ValidationRequest, Chat, Message)
+
+
+class ValidationRequestSerializer(ModelSerializer):
+    class Meta:
+        model = ValidationRequest
+        fields = '__all__'
+
+
 
 class UserSerializer(ModelSerializer):
-
+    totallikes = serializers.IntegerField(read_only=True)
+    totalviews = serializers.IntegerField(read_only=True)
     class Meta:
         model = User
         exclude = ['password']
@@ -18,6 +27,8 @@ class UserSerializer(ModelSerializer):
             'is_authorized'     : {'read_only': True},
             'balance'           : {'read_only': True},
             'groups'            : {'read_only': True},
+            'totallikes'        : {'read_only': True},
+            'totalviews'        : {'read_only': True},
             'user_permissions'  : {'read_only': True},
         }
 
@@ -46,7 +57,7 @@ class FriendshipSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MessageSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Message
         fields = '__all__'
