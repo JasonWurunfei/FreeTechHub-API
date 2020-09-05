@@ -17,7 +17,7 @@ class TagSerializer(serializers.ModelSerializer):
         except Blog.DoesNotExist:
             raise serializers.ValidationError("Tagged blog does not exsit.")
         except Question.DoesNotExist:
-            raise serializers.ValidationError("Tagged blog does not exsit.")
+            raise serializers.ValidationError("Tagged question does not exsit.")
 
         return value
 

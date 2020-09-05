@@ -7,13 +7,12 @@ class AnswerSerializer(serializers.ModelSerializer):
     owner_instance = UserSerializer(read_only=True)
     like_num = serializers.IntegerField(read_only=True)
     dislike_num = serializers.IntegerField(read_only=True)
-    content_type_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Answer
         fields = ["id", "content", "time", "status",
                   "owner", "owner_instance", "question", "like_num",
-                  "dislike_num", "content_type_id","root_comment"]
+                  "dislike_num", "root_comment"]
 
 class QuestionSerializer(serializers.ModelSerializer):
     owner_instance = UserSerializer(read_only=True)
@@ -22,5 +21,8 @@ class QuestionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Question
-        fields = ["id", "title", "content", "date", "viewTimes",
-        "owner", "owner_instance", "status", "bounty", "tags", "answers"]
+        fields = [
+            "id", "title", "content",
+            "date", "viewTimes", "owner",
+            "owner_instance", "status", "bounty",
+            "tags", "answers", "content_type_id"]

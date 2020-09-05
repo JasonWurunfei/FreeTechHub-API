@@ -7,34 +7,42 @@ from tag.models import Tag
 from comment.models import Comment
 
 class Question(models.Model):
-    title = models.CharField(max_length=50)
-    content = models.TextField()
-    date = models.DateTimeField(auto_now=True)
-    bounty = models.PositiveIntegerField(default=0)
-    viewTimes = models.IntegerField(default=0, blank=True)
-    status = models.BooleanField(default=False)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
-    tags = GenericRelation(Tag, related_query_name='question')
+    title       = models.CharField(max_length=50)
+    content     = models.TextField()
+    date        = models.DateTimeField(auto_now=True)
+    bounty      = models.PositiveIntegerField(default=0)
+    viewTimes   = models.IntegerField(default=0, blank=True)
+    status      = models.BooleanField(default=False)
+    owner       = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
+    tags        = GenericRelation(Tag, related_query_name='question')
     
     @property
     def owner_instance(self):
         return self.owner
 
-class Answer(models.Model):
-    content = models.TextField()
-    time = models.DateTimeField(auto_now=True) 
-    status = models.BooleanField(default=False)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='answers', on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, related_name='answers', on_delete=models.CASCADE)
-    root_comment = models.ForeignKey(Comment, related_name='root_comment', null=True, on_delete=models.CASCADE)
-
     @property
     def content_type(self):
-        return ContentType.objects.get(app_label='question', model='answer')
-    
+        return ContentType.objects.get(app_label='question', model='question')
+
     @property
     def content_type_id(self):
         return self.content_type.id
+
+class Answer(models.Model):
+    content         = models.TextField()
+    time            = models.DateTimeField(auto_now=True)
+    status          = models.BooleanField(default=False)
+    
+    owner           = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                        related_name='answers',
+                                        on_delete=models.CASCADE)
+
+    question        = models.ForeignKey(Question, related_name='answers',
+                                        on_delete=models.CASCADE)
+
+    root_comment    = models.ForeignKey(Comment, related_name='root_comment',
+                                        null=True, on_delete=models.CASCADE)
+
 
     @property
     def like_num(self):

@@ -15,3 +15,6 @@ class Tag(models.Model):
     tagged_object = GenericForeignKey('content_type', 'object_id')
 
     tag_name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f"<Tag {self.id}: {self.tag_name}>"

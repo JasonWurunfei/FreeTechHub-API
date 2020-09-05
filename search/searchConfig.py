@@ -14,7 +14,7 @@ fields = [
 ]
 
 blogTarget      = SearchTarget("Blog", Blog, fields, "date", BlogSerializer)
-questionTarget  = SearchTarget("Question", Question, fields, "date",QuestionSerializer)
+questionTarget  = SearchTarget("Question", Question, fields, "date", QuestionSerializer)
 
 targets = [
     blogTarget,
