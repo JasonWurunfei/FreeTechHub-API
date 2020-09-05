@@ -21,7 +21,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     ]
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         data = {
             'content': request.data['content'],
             'owner' : request.user.id,
