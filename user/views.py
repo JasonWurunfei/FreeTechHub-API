@@ -339,18 +339,18 @@ def generateKey(length):
     keys = "".join(letters)
     return keys
 
-
+from django.conf import settings
 def send_email(user, email, request_type):
     code = generateKey(20)
     if request_type == "forget_password":
         emailvate = ValidationRequest.objects.create(owner=user, email=email, code=code, request_type="ForgetPassowrd")
-        ret = f"Your verification code is :http://localhost:8080/#/forgetpassword/{code}/{emailvate.owner.id}/"
+        ret = f"Your verification code is :http://{settings.FRONT_DOMAIN}/#/forgetpassword/{code}/{emailvate.owner.id}/"
     elif request_type == "register":
         emailvate = ValidationRequest.objects.create(owner=user, email=email, code=code, request_type="Verify")
-        ret = f"Your verification code is :http://localhost:8080/#/active/{code}/{emailvate.owner.id}"
+        ret = f"Your verification code is :http://{settings.FRONT_DOMAIN}/#/active/{code}/{emailvate.owner.id}"
     elif request_type == "change_email":
         emailvate = ValidationRequest.objects.create(owner=user, email=email, code=code, request_type="Verify")
-        ret = f"Your verification code is :http://localhost:8080/#/active/{code}/{emailvate.owner.id}/{email}"
+        ret = f"Your verification code is :http://{settings.FRONT_DOMAIN}/#/active/{code}/{emailvate.owner.id}/{email}"
     my_email = send_mail('Activation validation', ret, settings.DEFAULT_FROM_EMAIL, [email])
 
 
