@@ -15,15 +15,19 @@ from django.contrib.auth.models import (
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, email, password=None, *args, **kwargs):
         """
         Creates and saves a User with the given email, date of
         birth and password.
         """
+
         if not username:
             raise ValueError('Users must have a username')
 
-        user = self.model(username=username)
+        if not email:
+            raise ValueError('Users must have a email')
+
+        user = self.model(username=username, email=email)
 
         user.set_password(password)
         user.save(using=self._db)
