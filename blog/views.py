@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from comment.models import Comment
-
+from .pagination import MyPagination
 
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
@@ -17,6 +17,8 @@ class BlogViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly
     ]
+    pagination_class = MyPagination
+    
 
     """
     Overide retrieve to support count view number.

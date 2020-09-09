@@ -7,6 +7,7 @@ from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
 from comment.models import Comment
+from .pagination import MyPagination
 
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -17,6 +18,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly
     ]
+    pagination_class = MyPagination
 
     def create(self, request, *args, **kwargs):
         data = {
