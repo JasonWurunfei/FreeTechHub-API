@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from like.models import Like
 from tag.models import Tag
 from comment.models import Comment
+from blog.models import View
 
 class Question(models.Model):
     title       = models.CharField(max_length=50)
@@ -27,6 +28,11 @@ class Question(models.Model):
     @property
     def content_type_id(self):
         return self.content_type.id
+    
+    @property
+    def view_num(self):
+        return View.objects.filter(content_type=self.content_type,
+                                   object_id=self.id).count()
 
 class Answer(models.Model):
     content         = models.TextField()

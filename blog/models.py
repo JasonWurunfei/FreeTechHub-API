@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from tag.models import Tag
 from like.models import Like
@@ -23,7 +23,6 @@ class Series(models.Model):
                                       null=True,)
 
 
-
 class Blog(models.Model):
     title       = models.CharField(max_length=40)
     content     = models.TextField()
@@ -40,9 +39,9 @@ class Blog(models.Model):
                                     on_delete=models.SET_NULL)
 
     root_comment = models.ForeignKey(Comment,
-                                      related_name='special_comment',
-                                      null=True,
-                                      on_delete=models.CASCADE)
+                                     related_name='special_comment',
+                                     null=True,
+                                     on_delete=models.CASCADE)
 
     tags        = GenericRelation(Tag, related_query_name='blog')
 
@@ -68,7 +67,8 @@ class Blog(models.Model):
 
     @property
     def view_num(self):
-        return self.views.count()
+        return View.objects.filter(content_type=self.content_type,
+                                   object_id=self.id).count()
 
     @property
     def owner_instance(self):
@@ -78,5 +78,13 @@ class Blog(models.Model):
 class View(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
-    blog = models.ForeignKey(Blog, related_name="views",
-                             on_delete=models.CASCADE)
+
+    limit = models.Q(app_label='blog',      model='blog') | \
+            models.Q(app_label='question',  model='question')
+
+    content_type    = models.ForeignKey(ContentType,
+                                        on_delete=models.CASCADE,
+                                        limit_choices_to=limit)
+
+    object_id       = models.PositiveIntegerField()
+    content_object  = GenericForeignKey('content_type', 'object_id')

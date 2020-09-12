@@ -25,10 +25,13 @@ class BlogViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         
         try:
-            View.objects.get(user=request.user, blog=instance)
+            View.objects.get(user=request.user,
+                             content_type=instance.content_type,
+                             object_id=instance.id)
         except View.DoesNotExist:
-            View.objects.create(user=request.user, blog=instance)
-
+            View.objects.create(user=request.user,
+                                content_type=instance.content_type,
+                                object_id=instance.id)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 

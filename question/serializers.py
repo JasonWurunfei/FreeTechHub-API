@@ -25,4 +25,5 @@ class QuestionSerializer(serializers.ModelSerializer):
             "id", "title", "content",
             "date", "viewTimes", "owner",
             "owner_instance", "status", "bounty",
-            "tags", "answers", "content_type_id"]
+            "tags", "answers", "content_type_id",
+            "view_num"]
