@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from comment.models import Comment
 from .pagination import MyPagination
+from blog.models import View
 
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -19,6 +20,23 @@ class QuestionViewSet(viewsets.ModelViewSet):
         IsOwnerOrReadOnly
     ]
     pagination_class = MyPagination
+
+    """
+    Overide retrieve to support count view number.
+    """
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            View.objects.get(user=request.user,
+                             content_type=instance.content_type,
+                             object_id=instance.id)
+        except View.DoesNotExist:
+            View.objects.create(user=request.user,
+                                content_type=instance.content_type,
+                                object_id=instance.id)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         data = {

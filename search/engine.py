@@ -1,146 +1,129 @@
 from django.db.models import Q
 
 class SearchField:
+    """
+    Model fields that will be searched against with.
+    Fields can have different weight to affect search rank
+    """
     def __init__(self, name, weight):
         self.name = name
         self.weight = weight
+    
+    def add_relevant_point(self, record, times=1):
+        """
+        This function will add the relevant points to the record.
+        """
+        record.relevant_point += self.weight * times
+    
+    def cal_relevant_point(self, record, keywords):
+        """
+        The searching part is delegated to this method,
+        different field may implement this method in different ways.
+        """
+        for keyword in keywords:
+            match_times = getattr(record.instance, self.name).count(keyword)
+            self.add_relevant_point(record, match_times)
     
     def __repr__(self):
         return f"<SearchField {self.name}>"
 
 
-class SearchTarget:
-    def __init__(self, modelName, model,
-                 fields, timefield, serializer):
-        self.modelName = modelName
-        self.model = model
-        self.fields = fields
+class Record:
+    def __init__(self, instance, serializer):
+        self.instance = instance
         self.serializer = serializer
-        self.timefield = timefield
+        self.relevant_point = 0
     
-    def get_field_by_name(self, name):
-        for field in self.fields:
-            if field.name == name:
-                return field
-        return None
+    @property
+    def serialize(self):
+        return self.serializer(self.instance).data
+
+    @property
+    def model_class(self):
+        return self.instance._meta.object_name
+    
+    def __repr__(self):
+        return f"<Record of model {self.instance._meta.object_name}>"
+
+class SearchTarget:
+    """
+    The search target is the model which will be searched
+    and whcih fields will be searched.
+    """
+    def __init__(self, model_class, search_fields, serializer):
+        self.model_class = model_class
+        self.search_fields = search_fields
+        self.serializer = serializer
+
+    def get_records(self):
+        """
+        This method will wrap up all the django model
+        instances into records.
+        """
+        instances = self.model_class.objects.all()
+        records = []
+        for instance in instances:
+            records.append(Record(instance, self.serializer))
+        return records
+
+    def cal_relevant_point(self, keywords):
+        records = self.get_records()
+        for record in records:
+            for field in self.search_fields:
+                field.cal_relevant_point(record, keywords)
+        return records
 
     def __repr__(self):
         return f"<SearchTarget for {self.model}>"
 
 
-class QueryResult:
-    def __init__(self, target, record):
-        self.modelName = target.modelName
-        self.target = target
-        self.record = record
-        self.relevantPoints = 0
-
-    def count_relevance(self, keyword):
-        for field in self.target.fields:
-            match_times = getattr(self.record, field.name).count(keyword)
-            self.increase_relevance(field, match_times)
+class SortRule:
+    def __init__(self, key, reverse=False):
+        self.key = key
+        self.reverse = reverse
     
-    def increase_relevance(self, field, times):
-        self.relevantPoints += field.weight * times
-    
-    def serialize(self):
-        return {
-            "model": self.modelName,
-            "record": self.target.serializer(self.record).data
-        }
+    def sort(self, records):
+        return sorted(records, key=self.key, reverse=self.reverse)
 
-    def __repr__(self):
-        return f"<QueryResult: [{self.modelName}] relevant points: {self.relevantPoints}>"
-
-
-class QueryResultList:
-    def __init__(self):
-        self.resultList = []
-        self.index = 0
-
-    def append(self, result):
-        self.resultList.append(result)
-
-    def remove(self, result):
-        return self.resultList.remove(result)
-
-    def serialize(self):
-        data = []
-        for result in self.resultList:
-            data.append(result.serialize())
-        return data
-
-    def exclude(self, exclude):
-        rest = []
-        for result in self.resultList:
-            if result.modelName != exclude:
-                rest.append(result)
-        self.resultList = rest
-        
-
-    def sort(self, new2old):
-
-        self.resultList = sorted(
-            self.resultList,
-            key=lambda result: getattr(result.record, result.target.timefield),
-            reverse=new2old
-        )
-        
-        self.resultList = sorted(
-            self.resultList,
-            key=lambda result: result.relevantPoints,
-            reverse=True
-        )
-    
-    def __iter__(self):
-        return self
- 
-    def __next__(self):
-        if self.index < len(self.resultList):
-            index = self.index
-            self.index += 1
-            return self.resultList[index]
-        else:
-            raise StopIteration
-
-    def __repr__(self):
-        return f"<QueryResultList: {self.resultList}>"
-
+relevant_key = lambda record : record.relevant_point
+relevant_rule = SortRule(relevant_key, True)
 
 class APISearchEngine:
-    def __init__(self, searchTargets=None):
-        self.searchTargets = searchTargets
+    def __init__(self, targets, rules=[]):
+        self.targets = targets
+        self.rules = rules + [relevant_rule]
 
-    def register(self, target):
-        self.searchTargets.append(target)
+    def serialize(self, records):
+        data = []
+        for record in records:
+            data.append({
+                "instance" : record.serialize,
+                "point"    : record.relevant_point,
+                "class"    : record.model_class
+            })
+        return data
 
-    def db_query(self, keywords, time=True):
-        query_results = QueryResultList()
-        for target in self.searchTargets:
-            records = None
-            for keyword in keywords:
-                Qr = None
-                for field in target.fields:
-                    q = Q(**{"%s__icontains" % field.name: keyword})
-                    Qr = Qr | q if Qr != None else q
+    def remove_irrelevant(self, records):
+        return [record for record in records \
+                if record.relevant_point != 0]
+    
+    def sort(self, records):
+        for rule in self.rules:
+            records = rule.sort(records)
+        return records
 
-                # get all the records which contains the `keyword` in the `field`
-                res = target.model.objects.filter(Qr).distinct()
-                records = res | records if records != None else res
-            
-            for record in records:
-                query_results.append(QueryResult(target, record))
-
-        return query_results    
-
-    def search(self, keywords, new2old=True, exclude=None):
-        query_results = self.db_query(keywords)
-        for result in query_results:
-            for keyword in keywords:
-                result.count_relevance(keyword)
+    def search(self, keywords, res_num=None):
+        records = []
+        for target in self.targets:
+            records += target.cal_relevant_point(keywords)
         
-        if exclude is not None:
-            query_results.exclude(exclude)
+        records = self.remove_irrelevant(records)
+        records = self.sort(records)
 
-        query_results.sort(new2old)
-        return query_results.serialize()
+        if res_num != None:
+            records = records[:res_num]
+
+        # serialize the records
+        result = self.serialize(records)
+        return result
+    
