@@ -533,8 +533,8 @@ class GetSelftags(APIView):
 class GetActivityTable(APIView):
     def get(self, request, user_id, format=None):
         results = []
-        begin = datetime.date(2020,7,29)
-        end = datetime.date(2020,8,31)
+        begin = datetime.date(2020,1,1)
+        end = datetime.date(2020,12,31)
         for i in range((end - begin).days + 1):
             daily_score = {}
             day = begin + datetime.timedelta(days=i)
