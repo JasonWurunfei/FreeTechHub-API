@@ -529,3 +529,22 @@ class GetSelftags(APIView):
         Bdata = judge(Btags)
         Qdata = judge(Qtags)
         return Response({'Qdata': Qdata, 'Bdata': Bdata, 'acceptance_rate': acceptance_rate})
+
+class GetActivityTable(APIView):
+    def get(self, request, user_id, format=None):
+        results = []
+        begin = datetime.date(2020,1,1)
+        end = datetime.date(2020,12,31)
+        for i in range((end - begin).days + 1):
+            daily_score = {}
+            day = begin + datetime.timedelta(days=i)
+            blog_count = Blog.objects.filter(owner_id=user_id, date__date=day).count()
+            question_count = Question.objects.filter(owner_id=user_id, date__date=day).count()
+            answer_count = Answer.objects.filter(owner_id=user_id, time__date=day).count()
+            activity_score = blog_count*10 + question_count*5 + answer_count*2
+            if activity_score != 0:
+                daily_score["date"] = day
+                daily_score["score"] = activity_score
+                results.append(daily_score)
+        return Response(results)
+

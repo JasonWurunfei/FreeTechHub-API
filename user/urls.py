@@ -34,5 +34,5 @@ urlpatterns = [
     path('checkrepeat/', views.CheckRepeatView.as_view()),
     path('upload/', views.UploadAvatatrView.as_view()),
     path('gettags/<int:user_id>/', views.GetSelftags.as_view()),
-
+    path('getactivitytable/<int:user_id>/', views.GetActivityTable.as_view())
 ]

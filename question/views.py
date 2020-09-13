@@ -7,6 +7,7 @@ from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
 from comment.models import Comment
+from .pagination import Pagination
 from blog.models import View
 
 # Create your views here.
@@ -18,6 +19,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly
     ]
+    pagination_class = Pagination
 
     """
     Overide retrieve to support count view number.
