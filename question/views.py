@@ -6,6 +6,9 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
+from comment.models import Comment
+from .pagination import Pagination
+from blog.models import View
 
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -16,6 +19,24 @@ class QuestionViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly
     ]
+    pagination_class = Pagination
+
+    """
+    Overide retrieve to support count view number.
+    """
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        try:
+            View.objects.get(user=request.user,
+                             content_type=instance.content_type,
+                             object_id=instance.id)
+        except View.DoesNotExist:
+            View.objects.create(user=request.user,
+                                content_type=instance.content_type,
+                                object_id=instance.id)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         data = {
@@ -28,7 +49,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         }
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-            
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -46,17 +67,21 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = {
+            'content':request.data['content'],
             status: False,
             'owner' : request.user.id,
-            'question'  : request.data['question']
+            'content': request.data['content'],
         }
+        if request.data.get('question') is not None:
+            data.update({'question': request.data['question']})
+
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
-        
+
+        root_comment = Comment.objects.create(content='', owner=request.user, sub_comments_of=None)
+        data.update({'root_comment': root_comment.id})
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    
