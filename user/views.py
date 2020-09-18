@@ -489,17 +489,24 @@ class CheckRepeatView(APIView):
 
 class UploadAvatatrView(APIView):
     def post(self, request, format=None):
-        url = "/avatar/"
         user = self.request.user
-        file_obj = request.FILES.get("file")
-        suffix = file_obj.name.rsplit(".")[1]
-        img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + str(user.id)
-        dir = os.path.join(os.path.join(settings.BASE_DIR, 'media/avatar'), img_name+'.'+suffix)
-        destination = open(dir, 'wb+')
-        for chunk in file_obj.chunks():
+        img = request.FILES.get("file")
+        extension = img.name.rsplit(".")[1]
+
+        # form the image name
+        img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
+                   str(user.id) + '.' + extension
+
+        # write the actual image into disk
+        img_path = os.path.join(settings.AVATAR_DIR, img_name)
+        destination = open(img_path, 'wb+')
+        for chunk in img.chunks():
             destination.write(chunk)
-        User.objects.filter(id=user.id).update(avatar=url+img_name+'.'+suffix)
         destination.close()
+        
+        # update img path in the database
+        User.objects.filter(id=user.id).update(
+            avatar=os.path.join("avatar", img_name))
         return Response('True')
 
 

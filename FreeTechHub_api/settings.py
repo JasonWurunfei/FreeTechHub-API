@@ -196,15 +196,6 @@ USE_L10N = True
 # 置为False
 USE_TZ = False
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-AUTH_USER_MODEL = 'user.User'
-
 #stmp account
 EMAIL_HOST = 'smtp.qq.com'
 EMAIL_PORT = 465
@@ -212,8 +203,28 @@ EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_EMAIL_USER')
-# FRONT_DOMAIN = '115.29.242.221'
-FRONT_DOMAIN = '127.0.0.1:8080'
+
+AUTH_USER_MODEL = 'user.User'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
+
+PRODUCTION = False
+IP = '115.29.242.221' if PRODUCTION else '127.0.0.1'
+FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:8080'
+# FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:80'
+
+BACK_DOMAIN = f'{IP}:8002' if PRODUCTION else f'{IP}:8000'
+# STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else r"D:\nginx\nginx-1.18.0\html" 
+STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else BASE_DIR
+
+STATIC_DOMAIN = FRONT_DOMAIN if PRODUCTION else BACK_DOMAIN
+STATIC_URL = f'http://{STATIC_DOMAIN}/static/'
+STATIC_ROOT = os.path.join(STATIC_DIR, 'static')
+
 # 媒体文件地址
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL = f'http://{STATIC_DOMAIN}/media/' if PRODUCTION else '/media/'
+MEDIA_ROOT = os.path.join(STATIC_DIR, 'media')
+
+AVATAR_DIR = os.path.join(MEDIA_ROOT, 'avatar')
+AVATAR_URL =  os.path.join(MEDIA_URL, 'avatar')
