@@ -61,7 +61,7 @@ class GetSelfView(APIView):
 
     def get(self, request, format=None):
         user = self.get_object(request.user.id)
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={"request": request})
         return Response(serializer.data)
 
 
@@ -80,12 +80,12 @@ class FollowershipListView(APIView):
         followings = []
         following_followerships = Followership.objects.filter(follower_id=user_id)
         for followership in following_followerships:
-            followings.append(UserSerializer(followership.following).data)
+            followings.append(UserSerializer(followership.following, context={"request": request}).data)
 
         followers = []
         follower_followerships = Followership.objects.filter(following_id=user_id)
         for followership in follower_followerships:
-            followers.append(UserSerializer(followership.follower).data)
+            followers.append(UserSerializer(followership.follower, context={"request": request}).data)
 
         content = {
             "followings": followings,     # users that this user follows
@@ -219,11 +219,11 @@ class GetFriendsView(APIView):
                 # if user is friend_1 in a friendship
                 # then friend_2 is this user's friend.
                 serialized_friends.append(
-                    UserSerializer(friendship.friend_2).data
+                    UserSerializer(friendship.friend_2, context={"request": request}).data
                 )
             else:
                 serialized_friends.append(
-                    UserSerializer(friendship.friend_1).data
+                    UserSerializer(friendship.friend_1, context={"request": request}).data
                 )
 
         return Response(serialized_friends)
