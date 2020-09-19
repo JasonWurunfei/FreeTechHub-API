@@ -219,7 +219,7 @@ BACK_DOMAIN = f'{IP}:8002' if PRODUCTION else f'{IP}:8000'
 STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else BASE_DIR
 
 STATIC_DOMAIN = FRONT_DOMAIN if PRODUCTION else BACK_DOMAIN
-STATIC_URL = f'http://{STATIC_DOMAIN}/static/'
+STATIC_URL = f'http://{STATIC_DOMAIN}/static/' if PRODUCTION else '/static/'
 STATIC_ROOT = os.path.join(STATIC_DIR, 'static')
 
 # 媒体文件地址
