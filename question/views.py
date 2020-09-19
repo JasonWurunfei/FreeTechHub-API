@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from comment.models import Comment
 from .pagination import Pagination
 from blog.models import View
@@ -85,3 +86,10 @@ class AnswerViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class QueryViewSet(APIView):
+    def get(self, request, format=None, **kwargs):
+        request_user = self.request.query_params.get('request_user', None)
+        questions = Question.objects.filter(owner=request.user)
+        return Response(QuestionSerializer(questions, many=True).data)
