@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFill
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from like.models import Like
@@ -16,6 +18,10 @@ class Question(models.Model):
     status      = models.BooleanField(default=False)
     owner       = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
     tags        = GenericRelation(Tag, related_query_name='question')
+    background_image = ProcessedImageField(upload_to=settings.QUESTION_DIR,
+                                  processors=[ResizeToFill(100,100)],
+                                  default='question/default.png',
+                                  verbose_name='question',)
     
     @property
     def owner_instance(self):

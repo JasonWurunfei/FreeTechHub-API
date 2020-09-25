@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from django.conf import settings
 from .serializers import QuestionSerializer,AnswerSerializer
 from .models import Question, Answer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -10,6 +11,8 @@ from rest_framework.views import APIView
 from comment.models import Comment
 from .pagination import Pagination
 from blog.models import View
+import datetime
+import os
 
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -29,7 +32,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         
         try:
-            View.objects.get(user=request.user,
+            View.objects.get(user=request.user, 
                              content_type=instance.content_type,
                              object_id=instance.id)
         except View.DoesNotExist:
@@ -48,8 +51,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'status': False,
             'owner' : request.user.id,
         }
+              
         if request.data.get('csrfmiddlewaretoken') is not None:
-            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
+            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})    
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -69,7 +73,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = {
             'content':request.data['content'],
-            status: False,
+            'status': False,
             'owner' : request.user.id,
             'content': request.data['content'],
         }
@@ -91,5 +95,29 @@ class AnswerViewSet(viewsets.ModelViewSet):
 class QueryViewSet(APIView):
     def get(self, request, format=None, **kwargs):
         request_user = self.request.query_params.get('request_user', None)
-        questions = Question.objects.filter(owner=request.user)
+        questions = Question.objects.filter(owner=request_user)
         return Response(QuestionSerializer(questions, many=True).data)
+
+
+class UploadView(APIView):
+    def post(self, request, format=None):
+        question_id = request.data.get('id')
+        img = request.FILES.get("file")
+        print(img)
+        extension = img.name.rsplit(".")[1]
+
+        # form the image name
+        img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
+                   str(question_id ) + '.' + extension
+
+        # write the actual image into disk
+        img_path = os.path.join(settings.QUESTION_DIR, img_name)
+        destination = open(img_path, 'wb+')
+        for chunk in img.chunks():
+            destination.write(chunk)
+        destination.close()
+        
+        # update img path in the database
+        Question.objects.filter(id=question_id).update(
+            background_image=os.path.join("question", img_name))
+        return Response('True')
