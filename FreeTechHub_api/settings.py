@@ -196,7 +196,7 @@ USE_L10N = True
 # 置为False
 USE_TZ = False
 
-stmp account
+#stmp account
 EMAIL_HOST = 'smtp.qq.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
