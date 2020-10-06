@@ -17,6 +17,16 @@ static
 !**/avatar
 !**/avatar/default.png
 
+# question
+**/question/**
+!**/question
+!**/question/default.png
+
+# blog
+**/blog/**
+!**/blog
+!**/blog/default.png
+
 # Backup files # 
 *.bak 
 

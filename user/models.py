@@ -75,10 +75,9 @@ class User(AbstractUser):
     grade   = models.CharField(max_length=20, blank=True, default='')
     bio     = models.TextField(blank=True, default='')
     avatar  = ProcessedImageField(upload_to=settings.AVATAR_DIR,
+                                  processors=[ResizeToFill(100, 50)],
                                   default='avatar/default.png',
-                                  verbose_name='avatar',
-                                  #图片将处理成100 x 100的尺寸
-                                  processors=[ResizeToFill(100,100)],)
+                                  verbose_name='avatar',)
 
     def __str__(self):
         return self.username

@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import QuestionViewSet, AnswerViewSet
+from question import views
 
 router = routers.DefaultRouter()
-router.register('question', QuestionViewSet)
-router.register('answer', AnswerViewSet)
+router.register('question', views.QuestionViewSet)
+router.register('answer', views.AnswerViewSet)
 
 urlpatterns = [
     path('', include(router.urls)), 
+    path('query-related-content/', views.QueryViewSet.as_view()),
 ]

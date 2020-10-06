@@ -74,12 +74,9 @@ class QueryView(APIView):
     are belong to the requesting user.
     """
     def get(self, request, format=None, **kwargs):
-        blogs = Blog.objects.filter(owner=request.user)
-        all_series = Series.objects.filter(owner=request.user)
-        user_related_content = {}
-        user_related_content['blog'] = [BlogSerializer(blog).data for blog in blogs]
-        user_related_content['series'] = [SeriesSerializer(series).data for series in all_series]
-        return Response(user_related_content)
+        request_user = self.request.query_params.get('request_user', None)
+        blogs = Blog.objects.filter(owner=request_user)
+        return Response(BlogSerializer(blogs, many=True).data)
 
 
 class UpdateSelectedView(APIView):

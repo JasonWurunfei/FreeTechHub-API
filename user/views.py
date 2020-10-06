@@ -37,8 +37,8 @@ class ChatPagination(PageNumberPagination):
 
 # Create your views here.
 class ValidationRequestViewSet(viewsets.ModelViewSet):
-        queryset = ValidationRequest.objects.all()
-        serializer_class = ValidationRequestSerializer
+    queryset = ValidationRequest.objects.all()
+    serializer_class = ValidationRequestSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
