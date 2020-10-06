@@ -18,14 +18,14 @@ class BlogViewSet(viewsets.ModelViewSet):
         IsOwnerOrReadOnly
     ]
     pagination_class = Pagination
-    
+
 
     """
     Overide retrieve to support count view number.
     """
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        
+
         try:
             View.objects.get(user=request.user,
                              content_type=instance.content_type,
@@ -41,6 +41,7 @@ class BlogViewSet(viewsets.ModelViewSet):
         data = {
             'title': request.data['title'],
             'content': request.data['content'],
+            'background_image': request.data['background_image'],
             'viewTimes': 0,
             'owner' : request.user.id,
         }

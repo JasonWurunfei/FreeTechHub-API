@@ -46,11 +46,10 @@ class Blog(models.Model):
                                      on_delete=models.CASCADE)
 
     tags        = GenericRelation(Tag, related_query_name='blog')
-    
+
     background_image = ProcessedImageField(upload_to=settings.BLOG_DIR,
-                                  processors=[ResizeToFill(100,100)],
                                   default='blog/default.png',
-                                  verbose_name='blog',)   
+                                  verbose_name='blog',)
 
     @property
     def content_type(self):

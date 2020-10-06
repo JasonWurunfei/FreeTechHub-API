@@ -197,12 +197,20 @@ USE_L10N = True
 USE_TZ = False
 
 #stmp account
-EMAIL_HOST = 'smtp.qq.com'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
-EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_EMAIL_USER')
+# EMAIL_HOST = 'smtp.qq.com'
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
+# EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
+# EMAIL_USE_SSL = True
+# DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_EMAIL_USER')
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = '18358957971@163.com'
+EMAIL_HOST_PASSWORD = 'XDFGOCREKMVRBCTC'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Freetechtub<18358957971@163.com>'
+
+
 
 AUTH_USER_MODEL = 'user.User'
 
@@ -215,7 +223,7 @@ FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:8080'
 # FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:80'
 
 BACK_DOMAIN = f'{IP}:8002' if PRODUCTION else f'{IP}:8000'
-# STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else r"D:\nginx\nginx-1.18.0\html" 
+# STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else r"D:\nginx\nginx-1.18.0\html"
 STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else BASE_DIR
 
 STATIC_DOMAIN = FRONT_DOMAIN if PRODUCTION else BACK_DOMAIN

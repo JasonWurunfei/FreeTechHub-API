@@ -30,9 +30,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
     """
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        
+
         try:
-            View.objects.get(user=request.user, 
+            View.objects.get(user=request.user,
                              content_type=instance.content_type,
                              object_id=instance.id)
         except View.DoesNotExist:
@@ -51,8 +51,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'status': False,
             'owner' : request.user.id,
             'background_image' : request.data['background_image'],
-        }
-        print(request.data)     
+        }  
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})    
 
@@ -98,4 +97,3 @@ class QueryViewSet(APIView):
         request_user = self.request.query_params.get('request_user', None)
         questions = Question.objects.filter(owner=request_user)
         return Response(QuestionSerializer(questions, many=True).data)
-
