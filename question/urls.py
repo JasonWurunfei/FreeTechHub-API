@@ -9,5 +9,4 @@ router.register('answer', views.AnswerViewSet)
 urlpatterns = [
     path('', include(router.urls)), 
     path('query-related-content/', views.QueryViewSet.as_view()),
-    path('upload/', views.UploadView.as_view()),
 ]

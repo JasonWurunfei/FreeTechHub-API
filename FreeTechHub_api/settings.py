@@ -231,3 +231,6 @@ AVATAR_URL =  os.path.join(MEDIA_URL, 'avatar')
 
 QUESTION_DIR = os.path.join(MEDIA_ROOT, 'question')
 QUESTION_URL = os.path.join(MEDIA_URL,  'question')
+
+BLOG_DIR = os.path.join(MEDIA_ROOT, 'blog')
+BLOG_URL = os.path.join(MEDIA_URL,  'blog')

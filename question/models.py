@@ -19,10 +19,9 @@ class Question(models.Model):
     owner       = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
     tags        = GenericRelation(Tag, related_query_name='question')
     background_image = ProcessedImageField(upload_to=settings.QUESTION_DIR,
-                                  processors=[ResizeToFill(100,100)],
                                   default='question/default.png',
                                   verbose_name='question',)
-    
+
     @property
     def owner_instance(self):
         return self.owner
@@ -34,7 +33,7 @@ class Question(models.Model):
     @property
     def content_type_id(self):
         return self.content_type.id
-    
+
     @property
     def view_num(self):
         return View.objects.filter(content_type=self.content_type,
@@ -44,7 +43,7 @@ class Answer(models.Model):
     content         = models.TextField()
     time            = models.DateTimeField(auto_now=True)
     status          = models.BooleanField(default=False)
-    
+
     owner           = models.ForeignKey(settings.AUTH_USER_MODEL,
                                         related_name='answers',
                                         on_delete=models.CASCADE)
@@ -71,4 +70,3 @@ class Answer(models.Model):
     @property
     def owner_instance(self):
         return self.owner
-    

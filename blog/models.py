@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFill
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from tag.models import Tag
@@ -44,6 +46,11 @@ class Blog(models.Model):
                                      on_delete=models.CASCADE)
 
     tags        = GenericRelation(Tag, related_query_name='blog')
+    
+    background_image = ProcessedImageField(upload_to=settings.BLOG_DIR,
+                                  processors=[ResizeToFill(100,100)],
+                                  default='blog/default.png',
+                                  verbose_name='blog',)   
 
     @property
     def content_type(self):

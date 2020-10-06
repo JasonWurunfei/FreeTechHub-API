@@ -50,8 +50,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'viewTimes': 0,
             'status': False,
             'owner' : request.user.id,
+            'background_image' : request.data['background_image'],
         }
-              
+        print(request.data)     
         if request.data.get('csrfmiddlewaretoken') is not None:
             data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})    
 
@@ -98,26 +99,3 @@ class QueryViewSet(APIView):
         questions = Question.objects.filter(owner=request_user)
         return Response(QuestionSerializer(questions, many=True).data)
 
-
-class UploadView(APIView):
-    def post(self, request, format=None):
-        question_id = request.data.get('id')
-        img = request.FILES.get("file")
-        print(img)
-        extension = img.name.rsplit(".")[1]
-
-        # form the image name
-        img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
-                   str(question_id ) + '.' + extension
-
-        # write the actual image into disk
-        img_path = os.path.join(settings.QUESTION_DIR, img_name)
-        destination = open(img_path, 'wb+')
-        for chunk in img.chunks():
-            destination.write(chunk)
-        destination.close()
-        
-        # update img path in the database
-        Question.objects.filter(id=question_id).update(
-            background_image=os.path.join("question", img_name))
-        return Response('True')
