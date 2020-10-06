@@ -1,14 +1,18 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from django.conf import settings
 from .serializers import QuestionSerializer,AnswerSerializer
 from .models import Question, Answer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from comment.models import Comment
 from .pagination import Pagination
 from blog.models import View
+import datetime
+import os
 
 # Create your views here.
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -28,7 +32,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         
         try:
-            View.objects.get(user=request.user,
+            View.objects.get(user=request.user, 
                              content_type=instance.content_type,
                              object_id=instance.id)
         except View.DoesNotExist:
@@ -46,9 +50,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
             'viewTimes': 0,
             'status': False,
             'owner' : request.user.id,
+            'background_image' : request.data['background_image'],
         }
+        print(request.data)     
         if request.data.get('csrfmiddlewaretoken') is not None:
-            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})
+            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})    
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -68,7 +74,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = {
             'content':request.data['content'],
-            status: False,
+            'status': False,
             'owner' : request.user.id,
             'content': request.data['content'],
         }
@@ -85,3 +91,11 @@ class AnswerViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class QueryViewSet(APIView):
+    def get(self, request, format=None, **kwargs):
+        request_user = self.request.query_params.get('request_user', None)
+        questions = Question.objects.filter(owner=request_user)
+        return Response(QuestionSerializer(questions, many=True).data)
+

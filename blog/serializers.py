@@ -13,7 +13,7 @@ class BlogSerializer(serializers.ModelSerializer):
                    "date", "view_num", "owner",
                    "series", "tags", "like_num",
                    "dislike_num", "content_type_id",
-                   "root_comment", "owner_instance"]
+                   "root_comment", "owner_instance", "background_image"]
         
         extra_kwargs = {
             'like_num':        {'read_only': True},
