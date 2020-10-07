@@ -19,7 +19,8 @@ class BlogSerializer(serializers.ModelSerializer):
             'like_num':        {'read_only': True},
             'dislike_num':     {'read_only': True},
             'view_num':        {'read_only': True},
-            'content_type_id': {'read_only': True}
+            'content_type_id': {'read_only': True},
+            "background_image": {"allow_empty_file": True}
         }
 
 

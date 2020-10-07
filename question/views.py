@@ -42,24 +42,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        data = {
-            'title': request.data['title'],
-            'content': request.data['content'],
-            'bounty':request.data['bounty'],
-            'viewTimes': 0,
-            'status': False,
-            'owner' : request.user.id,
-            'background_image' : request.data['background_image'],
-        }  
-        if request.data.get('csrfmiddlewaretoken') is not None:
-            data.update({'csrfmiddlewaretoken': request.data['csrfmiddlewaretoken']})    
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()

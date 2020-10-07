@@ -18,6 +18,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     owner_instance = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, required=False)
     answers = AnswerSerializer(many=True, required=False)
+    bounty = serializers.IntegerField(required=False)
     
     class Meta:
         model = Question
@@ -27,3 +28,6 @@ class QuestionSerializer(serializers.ModelSerializer):
             "owner_instance", "status", "bounty",
             "tags", "answers", "content_type_id",
             "view_num", "background_image"]
+        extra_kwargs = {
+            "background_image": {"allow_empty_file": True},
+        }

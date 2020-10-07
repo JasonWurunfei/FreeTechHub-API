@@ -13,14 +13,15 @@ class Question(models.Model):
     title       = models.CharField(max_length=50)
     content     = models.TextField()
     date        = models.DateTimeField(auto_now=True)
-    bounty      = models.PositiveIntegerField(default=0)
+    bounty      = models.PositiveIntegerField(default=0, blank=True)
     viewTimes   = models.IntegerField(default=0, blank=True)
     status      = models.BooleanField(default=False)
     owner       = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='questions', on_delete=models.CASCADE)
     tags        = GenericRelation(Tag, related_query_name='question')
     background_image = ProcessedImageField(upload_to=settings.QUESTION_DIR,
-                                  default='question/default.png',
-                                  verbose_name='question',)
+                                           default='question/default.png',
+                                           verbose_name='question',
+                                           blank=True)
 
     @property
     def owner_instance(self):

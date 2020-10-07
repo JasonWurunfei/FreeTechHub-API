@@ -41,10 +41,13 @@ class BlogViewSet(viewsets.ModelViewSet):
         data = {
             'title': request.data['title'],
             'content': request.data['content'],
-            'background_image': request.data['background_image'],
             'viewTimes': 0,
             'owner' : request.user.id,
         }
+
+        if request.data.get('background_image') is not None:
+            data.update({'background_image': request.data['background_image']})
+
         if request.data.get('series') is not None:
             data.update({'series': request.data['series']})
 

@@ -48,8 +48,9 @@ class Blog(models.Model):
     tags        = GenericRelation(Tag, related_query_name='blog')
 
     background_image = ProcessedImageField(upload_to=settings.BLOG_DIR,
-                                  default='blog/default.png',
-                                  verbose_name='blog',)
+                                           default='blog/default.png',
+                                           verbose_name='blog',
+                                           blank=True)
 
     @property
     def content_type(self):
