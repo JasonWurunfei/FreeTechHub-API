@@ -215,7 +215,7 @@ FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:8080'
 # FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:80'
 
 BACK_DOMAIN = f'{IP}:8002' if PRODUCTION else f'{IP}:8000'
-# STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else r"D:\nginx\nginx-1.18.0\html" 
+# STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else r"D:\nginx\nginx-1.18.0\html"
 STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else BASE_DIR
 
 STATIC_DOMAIN = FRONT_DOMAIN if PRODUCTION else BACK_DOMAIN
