@@ -16,24 +16,27 @@ class BlogSerializer(serializers.ModelSerializer):
                    "root_comment", "owner_instance", "background_image"]
         
         extra_kwargs = {
-            'like_num':        {'read_only': True},
-            'dislike_num':     {'read_only': True},
-            'view_num':        {'read_only': True},
-            'content_type_id': {'read_only': True},
+            'like_num':         {'read_only': True},
+            'dislike_num':      {'read_only': True},
+            'view_num':         {'read_only': True},
+            'content_type_id':  {'read_only': True},
+            'owner_instance':   {'owner_instance': True},
             "background_image": {"allow_empty_file": True}
         }
 
 
 class SeriesSerializer(serializers.ModelSerializer):
     blogs = BlogSerializer(many=True, required=False)
-
+    owner_instance = UserSerializer(read_only=True)
     class Meta:
         model = Series
         fields = [ 
             "id", "name", "description",
             "date", "viewTimes", "owner", 
-            "sub_series_of", "sub_series", "blogs"
+            "sub_series_of", "sub_series", "blogs",
+            "owner_instance"
         ]
         extra_kwargs = {
-            'sub_series': {'read_only': True}
+            'sub_series':       {'read_only': True},
+            'owner_instance':   {'read_only': True},
         }

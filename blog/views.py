@@ -71,10 +71,25 @@ class SeriesViewSet(viewsets.ModelViewSet):
         IsOwnerOrReadOnly
     ]
 
+class QueryRelatedBlogAndSeriesView(APIView):
+    """
+    This view should return a list of all the blogs or series which 
+    are belong to the requesting user.
+    """
+    def get(self, request, format=None, **kwargs):
+        user_id = self.request.query_params.get('user_id', None)
+        user_related_content = {}
+        if user_id: 
+            blogs = Blog.objects.filter(owner_id=user_id)
+            all_series = Series.objects.filter(owner_id=user_id)
+            user_related_content['blog'] = BlogSerializer(blogs, many=True).data 
+            user_related_content['series'] = SeriesSerializer(all_series, many=True).data
+        return Response(user_related_content)
+
 
 class QueryView(APIView):
     """
-    This view should return a list of all the blogs or series which
+    This view should return a list of all the blogs which
     are belong to the requesting user.
     """
     def get(self, request, format=None, **kwargs):

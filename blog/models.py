@@ -24,6 +24,10 @@ class Series(models.Model):
                                       blank=True,
                                       null=True,)
 
+    @property
+    def owner_instance(self):
+        return self.owner
+
 
 class Blog(models.Model):
     title       = models.CharField(max_length=40)
