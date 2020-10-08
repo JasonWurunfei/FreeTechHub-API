@@ -34,9 +34,8 @@ class Record:
         self.serializer = serializer
         self.relevant_point = 0
     
-    @property
-    def serialize(self):
-        return self.serializer(self.instance).data
+    def serialize(self, request):
+        return self.serializer(self.instance, context={"request": request}).data
 
     @property
     def model_class(self):
@@ -97,7 +96,7 @@ class APISearchEngine:
         data = []
         for record in records:
             data.append({
-                "instance" : record.serialize,
+                "instance" : record.serialize(self.request),
                 "point"    : record.relevant_point,
                 "class"    : record.model_class
             })
@@ -112,7 +111,8 @@ class APISearchEngine:
             records = rule.sort(records)
         return records
 
-    def search(self, keywords, res_num=None):
+    def search(self, keywords, request, res_num=None):
+        self.request = request
         records = []
         for target in self.targets:
             records += target.cal_relevant_point(keywords)

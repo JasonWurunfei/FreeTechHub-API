@@ -3,6 +3,8 @@ from blog.models import Blog
 from blog.serializers import BlogSerializer
 from question.models import Question
 from question.serializers import QuestionSerializer
+from user.models import User
+from user.serializers import UserSerializer
 
 class TagSearchField(SearchField):
     def __init__(self):
@@ -25,9 +27,15 @@ class ContentSearchField(SearchField):
     def __init__(self):
         super().__init__("content", 1)
 
-tagSearchField = TagSearchField()
-titleField     = TitleSearchField()
-contentField   = ContentSearchField()
+
+class UsernameSearchField(SearchField):
+    def __init__(self):
+        super().__init__("username", 100)
+
+tagSearchField      = TagSearchField()
+titleField          = TitleSearchField()
+contentField        = ContentSearchField()
+usernameSearchField = UsernameSearchField()
 
 fields = [
     titleField,
@@ -37,10 +45,15 @@ fields = [
 
 blogTarget     = SearchTarget(Blog,     fields, BlogSerializer)
 questionTarget = SearchTarget(Question, fields, QuestionSerializer)
+userTarget     = SearchTarget(User, [usernameSearchField], UserSerializer)
 
-view_rule = SortRule(lambda record: record.instance.view_num, True)
+def view_key(record):
+    return 0 if isinstance(record.instance, User) else record.instance.view_num
+
+view_rule = SortRule(view_key, True)
 
 targets = [
     blogTarget,
-    questionTarget
+    questionTarget,
+    userTarget
 ]
