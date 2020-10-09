@@ -236,4 +236,4 @@ BLOG_DIR = os.path.join(MEDIA_ROOT, 'blog')
 BLOG_URL = os.path.join(MEDIA_URL,  'blog')
 
 #页面展示个数
-PAGE_SIZE = 6
+PAGE_SIZE = 13

@@ -55,21 +55,21 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class QueryView(APIView):
     @staticmethod
-    def get_serialized_sub_comments(comment):
+    def get_serialized_sub_comments(comment, request):
         serialized_sub_trees = []
         if len(comment.sub_comment_models) == 0:
             return {
-                "comment": CommentSerializer(comment).data,
+                "comment": CommentSerializer(comment, context={"request": request}).data,
                 "serialized_sub_trees": serialized_sub_trees
             }
         
 
         for sub_comment in comment.sub_comment_models:
-            sub_tree_list = QueryView.get_serialized_sub_comments(sub_comment)
+            sub_tree_list = QueryView.get_serialized_sub_comments(sub_comment, request)
             serialized_sub_trees.append(sub_tree_list)
         
         comment_dict = {
-            "comment": CommentSerializer(comment).data,
+            "comment": CommentSerializer(comment, context={"request": request}).data,
             "serialized_sub_trees": serialized_sub_trees
         }
         
@@ -78,6 +78,6 @@ class QueryView(APIView):
     def get(self, request, format=None, **kwargs):
         root_comment_id = self.request.query_params.get('id', None)
         root_comment = Comment.objects.get(id=root_comment_id)
-        comment_dict = QueryView.get_serialized_sub_comments(root_comment)
+        comment_dict = QueryView.get_serialized_sub_comments(root_comment, request)
         return Response(comment_dict)
     
