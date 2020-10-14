@@ -21,7 +21,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsAuthenticated,
         IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
     ]
     pagination_class = Pagination
 
@@ -49,7 +48,6 @@ class AnswerViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsAuthenticated,
         IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
     ]
 
     def create(self, request, *args, **kwargs):
@@ -79,3 +77,17 @@ class QueryViewSet(APIView):
         request_user = self.request.query_params.get('request_user', None)
         questions = Question.objects.filter(owner=request_user)
         return Response(QuestionSerializer(questions, many=True).data)
+
+class SortedAnswersViewSet(APIView):
+    @staticmethod
+    def getScore(answer):
+        return answer['score']
+
+    def get(self, request, format=None, **kwargs):
+        question_id = self.request.query_params.get('question_id', None)
+        answers = Answer.objects.filter(question=question_id)
+        list = []
+        for answer in answers:
+            list.append(AnswerSerializer(answer, context={"request": request}).data)
+        list.sort(reverse=True, key=SortedAnswersViewSet.getScore)
+        return Response(list)

@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Like
+from question.models import Answer
+from question.serializers import AnswerSerializer
 from .serializers import LikeSerializer
 from rest_framework import viewsets
 from django.contrib.contenttypes.models import ContentType
@@ -78,3 +80,29 @@ class LikeHistoryView(APIView):
         except Like.DoesNotExist:
             return Response("none", status=status.HTTP_200_OK)
 
+class LikeHistoryAnswersView(APIView):
+    """
+    This view will show whether this user liked or disliked 
+    the content of question's answers or neither.
+    """
+    def get(self, request, format=None, **kwargs):
+        user_id = request.query_params.get('user_id', None)
+        question_id = request.query_params.get('object_id', None)
+        answers = Answer.objects.filter(question=question_id)
+        result = []
+        for answer in answers:
+            item_type = ContentType.objects.get(id=answer.content_type_id)
+            try:
+                like = Like.objects.get(user=user_id,
+                                        content_type=item_type,
+                                        object_id=answer.id)
+                history = "liked" if like.like_type == True else "disliked"
+            except Like.DoesNotExist:
+                history = "none"
+
+            answers_dict = {
+                "answer_id": answer.id,
+                "history": history
+            }
+            result.append(answers_dict)
+        return Response(result)

@@ -9,4 +9,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('like-item/', views.LikeView.as_view()),
     path('like-history/', views.LikeHistoryView.as_view()),
+    path('like-history-answers/', views.LikeHistoryAnswersView.as_view())
 ]

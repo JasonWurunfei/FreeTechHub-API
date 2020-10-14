@@ -11,8 +11,15 @@ class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ["id", "content", "time", "status",
-                  "owner", "owner_instance", "question", "like_num",
-                  "dislike_num", "root_comment"]
+                  "owner", "owner_instance", "question", "content_type_id",
+                  "like_num","dislike_num", "score","root_comment"]
+
+        extra_kwargs = {
+            'like_num':         {'read_only': True},
+            'dislike_num':      {'read_only': True},
+            'score':            {'read_only': True},
+            'owner_instance':   {'owner_instance': True},
+        }
 
 class QuestionSerializer(serializers.ModelSerializer):
     owner_instance = UserSerializer(read_only=True)
@@ -29,5 +36,6 @@ class QuestionSerializer(serializers.ModelSerializer):
             "tags", "answers", "content_type_id",
             "view_num", "background_image"]
         extra_kwargs = {
+            'owner_instance':   {'read_only': True},
             "background_image": {"allow_empty_file": True},
         }
