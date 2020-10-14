@@ -55,6 +55,13 @@ class Answer(models.Model):
     root_comment    = models.ForeignKey(Comment, related_name='root_comment',
                                         null=True, on_delete=models.CASCADE)
 
+    @property
+    def content_type(self):
+        return ContentType.objects.get(app_label='question', model='answer')
+
+    @property
+    def content_type_id(self):
+        return self.content_type.id
 
     @property
     def like_num(self):
@@ -67,6 +74,10 @@ class Answer(models.Model):
         return Like.objects.filter(content_type=self.content_type,
                                    object_id=self.id,
                                    like_type=False).count()
+
+    @property
+    def score(self):
+        return 0 + self.like_num - self.dislike_num
 
     @property
     def owner_instance(self):

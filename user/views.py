@@ -554,4 +554,3 @@ class GetActivityTable(APIView):
                 daily_score["score"] = activity_score
                 results.append(daily_score)
         return Response(results)
-
