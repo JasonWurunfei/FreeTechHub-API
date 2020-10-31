@@ -229,6 +229,9 @@ MEDIA_ROOT = os.path.join(STATIC_DIR, 'media')
 AVATAR_DIR = os.path.join(MEDIA_ROOT, 'avatar')
 AVATAR_URL =  os.path.join(MEDIA_URL, 'avatar')
 
+IMG_DIR = os.path.join(MEDIA_ROOT, 'img')
+IMG_URL =  f'http://{STATIC_DOMAIN}/media/img/'
+
 QUESTION_DIR = os.path.join(MEDIA_ROOT, 'question')
 QUESTION_URL = os.path.join(MEDIA_URL,  'question')
 
