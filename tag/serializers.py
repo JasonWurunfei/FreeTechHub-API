@@ -1,19 +1,10 @@
 from rest_framework import serializers
 from .models import Tag
+from blog.models import Blog
+from question.models import Question
 from django.contrib.contenttypes.models import ContentType
 
 class TagSerializer(serializers.ModelSerializer):
-
-    def validate_content_type(self, value):
-        """
-        Limit the content type to only blog and question
-        """
-
-        if value != ContentType.objects.get(app_label='blog', model='blog') and \
-           value != ContentType.objects.get(app_label='question', model='question'):
-           raise serializers.ValidationError("Tagged object can only be blog or question.")
-
-        return value
 
     def validate_object_id(self, value):
         """
@@ -26,7 +17,7 @@ class TagSerializer(serializers.ModelSerializer):
         except Blog.DoesNotExist:
             raise serializers.ValidationError("Tagged blog does not exsit.")
         except Question.DoesNotExist:
-            raise serializers.ValidationError("Tagged blog does not exsit.")
+            raise serializers.ValidationError("Tagged question does not exsit.")
 
         return value
 

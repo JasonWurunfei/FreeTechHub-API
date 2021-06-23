@@ -4,13 +4,28 @@
 *.pyc
 __pycache__
 db.sqlite3
-media
 static
 
 # django migrations
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py
+
+
+# avatar
+**/avatar/**
+!**/avatar
+!**/avatar/default.png
+
+# question
+**/question/**
+!**/question
+!**/question/default.png
+
+# blog
+**/blog/**
+!**/blog
+!**/blog/default.png
 
 # Backup files # 
 *.bak 
@@ -120,3 +135,5 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+media/img/*

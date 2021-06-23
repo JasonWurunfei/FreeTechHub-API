@@ -62,3 +62,29 @@ class QueryByTagView(APIView):
         else:
             return Response("no query parameter is provided",
              status=status.HTTP_400_BAD_REQUEST)
+
+
+class SaveTagsView(APIView):
+
+    def post(self, request, format=None, **kwargs):
+        tag_list = request.data['tag_list']
+        object_id = request.data['object_id']
+        content_type_id = request.data['content_type_id']
+
+        tags = Tag.objects.filter(object_id=object_id,
+                                  content_type_id=content_type_id)
+        for tag in tags:
+            if not tag.tag_name in tag_list:
+                tag.delete()
+        
+        tags = []
+        for tag_name in tag_list:
+            tag, _ = Tag.objects.get_or_create(
+                        tag_name=tag_name,
+                        object_id=object_id,
+                        content_type_id=content_type_id
+                    )
+            tags.append(tag)
+        
+        return Response(TagSerializer(tags, many=True).data,
+                        status=status.HTTP_201_CREATED)

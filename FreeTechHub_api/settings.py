@@ -26,7 +26,7 @@ SECRET_KEY = 'n_u5=6xg8v96vpy9#i2f51e-xhm-&)f$&hg8ggb)b&)o35*s_g'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -44,12 +44,31 @@ INSTALLED_APPS = [
     'tag.apps.TagConfig',
     'question.apps.QuestionConfig',
     'transaction.apps.TransactionConfig',
+    'like.apps.LikeConfig',
+    'comment.apps.CommentConfig',
+    'search.apps.SearchConfig',
+    'skilltree.apps.SkilltreeConfig',
 
     # third party packages
     'rest_framework',
     'corsheaders',
     'imagekit',
+    'social_django',
+    'rest_social_auth',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GITHUB_KEY = '5ee059616c2412fba0e3'
+SOCIAL_AUTH_GITHUB_SECRET = '52d240bb20846c0d42b4d40ceeed9207f5e90d3b'
+SOCIAL_AUTH_GITHUB_SCOPE = ["email",]
+SOCIAL_AUTH_GITHUB_OAUTH2_SCOPE = [
+    "https://api.github.com/user/emails"
+]
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/blog/'
 
 REST_FRAMEWORK = {
 
@@ -119,6 +138,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -166,19 +187,56 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# 置为False
+USE_TZ = False
 
+#stmp account
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_EMAIL_USER')
+
+AUTH_USER_MODEL = 'user.User'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+PRODUCTION = False
+IP = '115.29.242.221' if PRODUCTION else '127.0.0.1'
+FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:8080'
+# FRONT_DOMAIN = f'{IP}:80' if PRODUCTION else f'{IP}:80'
 
-AUTH_USER_MODEL = 'user.User'
+BACK_DOMAIN = f'{IP}:8002' if PRODUCTION else f'{IP}:8000'
+# STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else r"D:\nginx\nginx-1.18.0\html"
+STATIC_DIR = '/usr/local/nginx/html' if PRODUCTION else BASE_DIR
+
+STATIC_DOMAIN = FRONT_DOMAIN if PRODUCTION else BACK_DOMAIN
+STATIC_URL = f'http://{STATIC_DOMAIN}/static/' if PRODUCTION else '/static/'
+STATIC_ROOT = os.path.join(STATIC_DIR, 'static')
+
+# 媒体文件地址
+MEDIA_URL = f'http://{STATIC_DOMAIN}/media/' if PRODUCTION else '/media/'
+MEDIA_ROOT = os.path.join(STATIC_DIR, 'media')
+
+AVATAR_DIR = os.path.join(MEDIA_ROOT, 'avatar')
+AVATAR_URL =  os.path.join(MEDIA_URL, 'avatar')
+
+IMG_DIR = os.path.join(MEDIA_ROOT, 'img')
+IMG_URL =  f'http://{STATIC_DOMAIN}/media/img/'
+
+QUESTION_DIR = os.path.join(MEDIA_ROOT, 'question')
+QUESTION_URL = os.path.join(MEDIA_URL,  'question')
+
+BLOG_DIR = os.path.join(MEDIA_ROOT, 'blog')
+BLOG_URL = os.path.join(MEDIA_URL,  'blog')
+
+#页面展示个数
+PAGE_SIZE = 13
